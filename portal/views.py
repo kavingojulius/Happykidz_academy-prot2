@@ -14,6 +14,7 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.http import JsonResponse
 from django.core import serializers
 from django.contrib.auth import get_user_model
+from .models import *
 
 # Create your views here.
 
@@ -34,6 +35,17 @@ def portal(request):
     # Mark unread messages as read when the admin opens the chat
     Message.objects.filter(sender=request.user, receiver=request.user, read=False).update(read=True)
 
+     # Get the current user's reg_number
+    reg_number = request.user.reg_number
+
+    # Filter the students based on the reg_number
+    students = StudentDet.objects.filter(reg_number=reg_number)
+
+
+
+
+
+
     if request.method == 'POST':
         message_text = request.POST['message']
         if message_text:
@@ -43,6 +55,7 @@ def portal(request):
     return render(request, 'portal/portal.html', {
         'messages': messages,
         'unread_count': unread_count,  # Pass unread count to the template
+        'students': students,
     })
 
 
