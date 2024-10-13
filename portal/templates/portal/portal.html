@@ -1,0 +1,286 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block title %} Parents Portal {% endblock %}
+
+{% block content %}
+<div class="container my-3">
+    <!-- Welcome message and username -->
+    <h4 class="text-muted">Welcome, {{ request.user.username }}!</h4>
+    <h4 class="text-muted">Registration number : {{ request.user.reg_number }}!</h4>
+
+    <!-- Display student details -->
+    <h5>Student Details:</h5>
+    <ul>
+        {% for student in students %}
+            <li>
+                <strong>Name:</strong> {{ student.name }} <br>
+                <strong>Grade:</strong> {{ student.grade }} <br>
+                <strong>Reg Number:</strong> {{ student.reg_number }} <br>
+            </li>
+        {% empty %}
+            <p>No students found for your account.</p>
+        {% endfor %}
+    </ul>
+
+
+
+
+
+    <div class="d-flex flex-column mt-3 col-md-3 col-lg-3" >
+        <!-- style="width: 25%; margin-top: 20px;" -->
+        <!-- Change Password Button -->
+        <a href="{% url 'change_password' %}" class="btn btn-primary mt-3">Change Password</a>
+
+        <!-- Chat button to toggle the chat window -->
+        <button id="chat-toggle" class="chat-toggle-btn mt-3">
+            Chat <span id="new-message-badge" class="new-message-badge" style="display: none;">New Message</span>
+        </button>
+    </div>
+</div>
+
+<!-- Chat section (initially hidden) -->
+<div id="chat-container" class="chat-container" style="display: none;">
+    <h5>Chat with Admin</h5>
+    
+    <div id="chat-box" class="chat-box">
+        <!-- Messages will be dynamically loaded here -->
+    </div>
+    
+    <form method="POST" class="chat-form" id="chat-form">
+        {% csrf_token %}
+        <textarea id="message-input" name="message" placeholder="Enter your message here" class="chat-input"></textarea><br>
+        <button type="submit" class="chat-button">Send</button>
+        <button type="button" id="delete-chat" class="chat-delete-btn">Delete Chats</button> <!-- New Delete Chats button -->
+    </form>
+</div>
+
+<!-- AJAX for refreshing messages and deleting chat -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function loadMessages() {
+        $.ajax({
+            url: "{% url 'get_messages' request.user.id %}",
+            method: 'GET',
+            success: function(data) {
+                let messages = JSON.parse(data.messages);
+                let chatBox = document.getElementById("chat-box");
+                chatBox.innerHTML = '';  // Clear the chat box
+
+                messages.forEach(function(message) {
+                    let msgDiv = document.createElement('div');
+                    msgDiv.classList.add('chat-message');
+                    
+                    if (message.fields.sender == "{{ request.user.id }}") {
+                        msgDiv.classList.add('user-message');
+                        msgDiv.innerHTML = "<b>You:</b> " + message.fields.message;
+                    } else {
+                        msgDiv.classList.add('admin-message');
+                        msgDiv.innerHTML = "<b>Admin:</b> " + message.fields.message;
+                    }
+                    chatBox.appendChild(msgDiv);
+                });
+
+                // Automatically scroll to the bottom of the chat box
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        });
+    }
+
+    function checkNewMessages() {
+        $.ajax({
+            url: "{% url 'get_messages' request.user.id %}",
+            method: 'GET',
+            success: function(data) {
+                let messages = JSON.parse(data.messages);
+                let unreadCount = 0;
+
+                messages.forEach(function(message) {
+                    // Count unread messages from admin
+                    if (message.fields.sender != "{{ request.user.id }}" && !message.fields.read) {
+                        unreadCount++;
+                    }
+                });
+
+                // Show/hide the new message badge
+                let badge = document.getElementById('new-message-badge');
+                if (unreadCount > 0) {
+                    badge.style.display = 'inline';  // Show badge
+                } else {
+                    badge.style.display = 'none';  // Hide badge
+                }
+            }
+        });
+    }
+
+    // Load messages every 5 seconds and check for new messages
+    setInterval(loadMessages, 5000);
+    setInterval(checkNewMessages, 5000);
+    loadMessages();  // Initial load
+    checkNewMessages();  // Initial check for new messages
+
+    // Toggle chat visibility
+    document.getElementById('chat-toggle').addEventListener('click', function() {
+        let chatContainer = document.getElementById('chat-container');
+        if (chatContainer.style.display === 'none') {
+            chatContainer.style.display = 'block';
+            loadMessages(); // Load messages when the chat is opened
+        } else {
+            chatContainer.style.display = 'none';
+        }
+    });
+
+    // Handle message submission
+    document.getElementById('chat-form').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the form from submitting the traditional way
+        let messageInput = document.getElementById('message-input');
+        let messageText = messageInput.value;
+
+        if (messageText) {
+            $.ajax({
+                url: "{% url 'portal' %}", // Ensure this is the correct URL for sending messages
+                method: 'POST',
+                data: {
+                    'message': messageText,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}' // Include CSRF token
+                },
+                success: function() {
+                    messageInput.value = ''; // Clear input after sending
+                    loadMessages(); // Refresh messages
+                }
+            });
+        }
+    });
+
+    // Handle chat deletion
+    document.getElementById('delete-chat').addEventListener('click', function() {
+        if (confirm('Are you sure you want to delete all your chats?')) {
+            $.ajax({
+                url: "{% url 'delete_chats' %}",  // Use the appropriate URL for deleting chats
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function() {
+                    loadMessages();  // Reload messages after deletion (it will be empty)
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Main chat container */
+    .chat-container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+
+    /* Chat box styling */
+    .chat-box {
+        height: 300px;
+        overflow-y: scroll;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        background-color: #fff;
+        margin-bottom: 15px;
+    }
+
+    /* Individual message styling */
+    .chat-message {
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+
+    /* User's messages */
+    .user-message {
+        background-color: #e0ffe0;
+        text-align: right;
+        margin-left: auto;
+    }
+
+    /* Admin's messages */
+    .admin-message {
+        background-color: #f1f1f1;
+    }
+
+    /* Chat input area */
+    .chat-input {
+        width: 100%;
+        height: 50px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        resize: none;
+    }
+
+    /* Send button styling */
+    .chat-button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    .chat-button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Delete button styling */
+    .chat-delete-btn {
+        background-color: #dc3545;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-left: 10px;
+    }
+
+    .chat-delete-btn:hover {
+        background-color: #c82333;
+    }
+
+    /* Chat toggle button styling */
+    .chat-toggle-btn {
+        background-color: #28a745;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .chat-toggle-btn:hover {
+        background-color: #218838;
+    }
+
+    /* New message badge */
+    .new-message-badge {
+        background-color: #ff0000;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 50px;
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    /* Add margin-top for spacing between the username and the chat button */
+    .mt-3 {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %} Admission Form {% endblock %}
+
+{% block content %}
+
+    <style>
+        body {
+            background-color: #f7f9fc;
+        }
+        .form-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .welcome-div {
+            background-color: #eaedf1;
+            color: #777a7d;
+            font-weight: bolder;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .welcome-div h2 {
+            font-weight: bold;
+        }        
+        h4 {
+            margin-top: 20px;
+            color: var(--primary);
+        }
+        label {
+            font-weight: bold;
+        }
+    </style>
+
+    <div class="container mt-5">
+        <!-- Welcome Section -->
+        <div class="welcome-div">
+            <h2>Welcome to Our School Admission Form</h2>
+            <p>Please fill out the form below carefully. Providing accurate details helps us ensure the best care and education for your child. If you have any questions, don't hesitate to contact our office for assistance.</p>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-container">
+            <form method="POST">
+                {% csrf_token %}
+
+                <!-- Student Information Section -->
+                <h4>Student Information</h4>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="first_name">First Name</label>
+                        {% render_field form.first_name class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="last_name">Last Name</label>
+                        {% render_field form.last_name class+="form-control" %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="date_of_birth">Date of Birth</label>
+                        {% render_field form.date_of_birth class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="gender">Gender</label>
+                        {% render_field form.gender class+="form-control" %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="applying_class">Class Applying For</label>
+                        {% render_field form.applying_class class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="previous_school">Previous School (if applicable)</label>
+                        {% render_field form.previous_school class+="form-control" %}
+                    </div>
+                </div>
+
+                <!-- Parent/Guardian Information Section -->
+                <h4>Parent/Guardian Information</h4>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="parent_first_name">Parent First Name</label>
+                        {% render_field form.parent_first_name class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="parent_last_name">Parent Last Name</label>
+                        {% render_field form.parent_last_name class+="form-control" %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="parent_phone">Phone Number</label>
+                        {% render_field form.parent_phone class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="parent_email">Email Address</label>
+                        {% render_field form.parent_email class+="form-control" %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="home_address">Home Address</label>
+                    {% render_field form.home_address class+="form-control" %}
+                </div>
+
+                <!-- Emergency Contact Section -->
+                <h4>Emergency Contact</h4>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="emergency_contact_name">Emergency Contact Name</label>
+                        {% render_field form.emergency_contact_name class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="emergency_contact_phone">Emergency Contact Phone Number</label>
+                        {% render_field form.emergency_contact_phone class+="form-control" %}
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-success mt-3">Submit Application</button>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}
