@@ -15,6 +15,16 @@ from django.http import JsonResponse
 from django.core import serializers
 from django.contrib.auth import get_user_model
 from .models import *
+from main.models import StudentAdmission
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from main.models import StudentAdmission
+import io
+
+
+
 
 # Create your views here.
 
@@ -42,10 +52,6 @@ def portal(request):
     students = StudentDet.objects.filter(reg_number=reg_number)
 
 
-
-
-
-
     if request.method == 'POST':
         message_text = request.POST['message']
         if message_text:
@@ -57,6 +63,60 @@ def portal(request):
         'unread_count': unread_count,  # Pass unread count to the template
         'students': students,
     })
+
+
+@login_required
+def admin(request):
+    # Retrieve all student admission records
+    admissions = StudentAdmission.objects.all().order_by('-submitted_at')  # Order by submission time, latest first
+    return render(request, 'portal/admin.html', {'admissions': admissions})
+
+
+def download_admissions_pdf(request):
+    # Create a byte stream buffer to hold the PDF
+    buffer = io.BytesIO()
+    pdf = SimpleDocTemplate(buffer, pagesize=A4)
+    elements = []
+
+    # Define the table data
+    admissions = StudentAdmission.objects.all()
+    data = [["#", "Name", "Gender", "D.O.B", "Class Applied", "Parent Name", "Contact", "Submitted At"]]
+    
+    for i, admission in enumerate(admissions, start=1):
+        row = [
+            i,
+            f"{admission.first_name} {admission.last_name}",
+            admission.gender,
+            admission.date_of_birth.strftime("%Y-%m-%d"),
+            admission.applying_class,
+            f"{admission.parent_first_name} {admission.parent_last_name}",
+            admission.parent_phone,
+            admission.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
+        ]
+        data.append(row)
+
+    # Create table and set style
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ]))
+    
+    elements.append(table)
+    pdf.build(elements)
+
+    # Return the PDF as an HTTP response
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="admission_requests.pdf"'
+    return response
+
 
 
 

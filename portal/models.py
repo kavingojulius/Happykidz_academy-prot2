@@ -33,9 +33,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.reg_number})"
-
-
-
+    
 # The document to be uploaded containing diff students & their details(excel file)
 class DocTitle(models.Model):
     title = models.CharField(max_length=255)
