@@ -118,8 +118,6 @@ def download_admissions_pdf(request):
     return response
 
 
-
-
 @login_required
 def delete_chats(request):
     if request.method == 'POST':
