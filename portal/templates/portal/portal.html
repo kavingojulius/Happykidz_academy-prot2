@@ -20,7 +20,20 @@
                 <strong>Reg Number:</strong> {{ student.reg_number }} <br>
             </li>
         {% empty %}
-            <p>No students found for your account.</p>
+            <p>No students details found for your account.</p>
+        {% endfor %}
+    </ul>
+
+    <h5>Current Term Fee Payment Details:</h5>
+    <ul>
+        {% for payment in fee_payments %}
+            <li>
+                <strong>Amount Paid:</strong> {{ payment.amount }} <br>
+                <strong>Balance:</strong> {{ payment.balance }} <br>
+                <strong>Date of Payment:</strong> {{ payment.date_paid }} <br>
+            </li>
+        {% empty %}
+            <p>No fee payment records found for your account.</p>
         {% endfor %}
     </ul>
 

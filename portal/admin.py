@@ -29,18 +29,25 @@ class StudentInline(admin.TabularInline):
     model = StudentDet
     extra = 1  # Allows adding one more student by default
 
+class FeePaymentInline(admin.TabularInline):
+    model = FeePayment
+    extra = 1
+
 class DocTitleAdmin(admin.ModelAdmin):
-    list_display = ('title',)
+    list_display = ('title', 'type')
     search_fields = ('title',)
-    inlines = [StudentInline]
+    inlines = [StudentInline, FeePaymentInline]  # Include inlines for both student and fee payments
 
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'reg_number', 'grade', 'doc_title')
     search_fields = ('name',)
 
+class FeePaymentAdmin(admin.ModelAdmin):
+    list_display = ('student_name', 'reg_number', 'amount',  'date_paid', 'balance')
+    search_fields = ('reg_number', 'student_name')
+
 admin.site.register(StudentDet, StudentAdmin)
-
-
+admin.site.register(FeePayment, FeePaymentAdmin)
 admin.site.register(DocTitle, DocTitleAdmin)
 
 

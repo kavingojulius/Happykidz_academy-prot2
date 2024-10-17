@@ -41,7 +41,7 @@ def portal(request):
 
     # Filter the students based on the reg_number
     students = StudentDet.objects.filter(reg_number=reg_number)
-
+    fee_payments = FeePayment.objects.filter(reg_number=reg_number)  # Query fee payment data
 
     if request.method == 'POST':
         message_text = request.POST['message']
@@ -53,6 +53,7 @@ def portal(request):
         'messages': messages,
         'unread_count': unread_count,  # Pass unread count to the template
         'students': students,
+        'fee_payments': fee_payments,
     })
 
 @login_required
