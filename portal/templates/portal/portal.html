@@ -7,8 +7,8 @@
 {% block content %}
 <div class="container my-3">
     <!-- Welcome message and username -->
-    <h4 class="text-muted">Welcome, {{ request.user.username }}!</h4>
-    <h4 class="text-muted">Registration number : {{ request.user.reg_number }}!</h4>
+    <h4 class="text-muted text-center">Welcome, {{ request.user.username }}!</h4>
+    <!-- <h4 class="text-muted">Registration number : </h4> -->
 
     <!-- Display student details -->
     <h5>Student Details:</h5>
@@ -24,16 +24,13 @@
         {% endfor %}
     </ul>
 
-    <div class="d-flex flex-column mt-3 col-md-3 col-lg-3" >
-        <!-- style="width: 25%; margin-top: 20px;" -->
-        <!-- Change Password Button -->
-        <a href="{% url 'change_password' %}" class="btn btn-primary mt-3">Change Password</a>
+    <a href="{% url 'change_password' %}" class="btn btn-primary">Change Password</a>
 
+    <br>
         <!-- Chat button to toggle the chat window -->
-        <button id="chat-toggle" class="chat-toggle-btn mt-3">
-            Chat <span id="new-message-badge" class="new-message-badge" style="display: none;">New Message</span>
-        </button>
-    </div>
+    <button id="chat-toggle" class="chat-toggle-btn mt-3 btn btn-primary">
+        Chat <span id="new-message-badge" class="new-message-badge" style="display: none;">New Message</span>
+    </button>
 </div>
 
 <!-- Chat section (initially hidden) -->

@@ -1,15 +1,11 @@
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
-# from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-from django.contrib.auth.views import PasswordChangeView
 from .models import Message
 from django.contrib import messages
-from django.urls import reverse_lazy
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.http import JsonResponse
 from django.core import serializers
@@ -24,13 +20,8 @@ from main.models import StudentAdmission
 import io
 
 
-
-
-# Create your views here.
-
-# Use get_user_model() to fetch the custom user model
+# get_user_model() fetches the custom user model
 User = get_user_model()  # This will now refer to 'portal.CustomUser'
-
 
 @login_required
 def portal(request):
@@ -64,13 +55,11 @@ def portal(request):
         'students': students,
     })
 
-
 @login_required
 def admin(request):
     # Retrieve all student admission records
     admissions = StudentAdmission.objects.all().order_by('-submitted_at')  # Order by submission time, latest first
     return render(request, 'portal/admin.html', {'admissions': admissions})
-
 
 def download_admissions_pdf(request):
     # Create a byte stream buffer to hold the PDF
@@ -117,7 +106,6 @@ def download_admissions_pdf(request):
     response['Content-Disposition'] = 'attachment; filename="admission_requests.pdf"'
     return response
 
-
 @login_required
 def delete_chats(request):
     if request.method == 'POST':
@@ -149,7 +137,6 @@ def logoutUser(request):
     logout(request)
     return redirect('home')
 
-
 @login_required
 def change_password(request):
     if request.method == 'POST':
@@ -165,8 +152,6 @@ def change_password(request):
         form = PasswordChangeForm(request.user)
     
     return render(request, 'portal/change_password.html', {'form': form})
-
-
 
 @login_required
 def admin_conversations(request):
@@ -193,7 +178,6 @@ def admin_conversations(request):
         'users_with_unread': users_with_unread,
     })
 
-
 @csrf_exempt
 @login_required
 def delete_conversation(request):
@@ -206,7 +190,6 @@ def delete_conversation(request):
 
     return JsonResponse({'status': 'error'}, status=403)
 
-
 def check_new_users(request):
     """Function to check for new users who have sent messages."""
     if request.user.is_superuser:
@@ -214,7 +197,6 @@ def check_new_users(request):
         new_users_list = [{'id': user.id, 'username': user.username} for user in new_users]
         return JsonResponse({'new_users': new_users_list})
     return JsonResponse({'new_users': []})
-
 
 @login_required
 def admin_chat(request, user_id):
@@ -239,7 +221,6 @@ def admin_chat(request, user_id):
             return redirect('admin_chat', user_id=user.id)
 
     return render(request, 'portal/admin_chat.html', {'messages': messages, 'user': user})
-
 
 @login_required
 def get_messages(request, user_id=None):
