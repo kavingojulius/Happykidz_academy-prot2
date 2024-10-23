@@ -13,14 +13,18 @@
         
         <a href="{% url 'admin_conversations' %}" class="btn btn-primary mt-3">Go to Chats</a>
         
+        <div class="d-flex  align-items-center mt-4">
+            <h3 style="margin-right: 10px;">Admission Requests</h3>
 
-        <h1 class="mt-4">Admission Requests</h1>
+            <!-- Toggle Button -->
+            <button id="toggleButton" class="btn btn-primary" onclick="toggleTable()">Show</button>
+        </div>
 
         <!-- PDF Download Button -->
         <a href="{% url 'download_admissions_pdf' %}" class="btn btn-success mb-3">Download as PDF</a>
 
-        <!-- Add the responsive table wrapper -->
-        <div class="table-responsive">
+        <!-- Add the responsive table wrapper and hide it by default -->
+        <div id="admissionsTable" class="table-responsive" style="display: none;">
             <table class="table table-striped table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
@@ -52,5 +56,21 @@
         </div>
     </div>
 </div>
+
+<!-- JavaScript to toggle the visibility of the table -->
+<script>
+    function toggleTable() {
+        var table = document.getElementById("admissionsTable");
+        var button = document.getElementById("toggleButton");
+
+        if (table.style.display === "none") {
+            table.style.display = "block";  // Show the table
+            button.textContent = "Hide";    // Change button text to 'Hide'
+        } else {
+            table.style.display = "none";   // Hide the table
+            button.textContent = "Show";    // Change button text to 'Show'
+        }
+    }
+</script>
 
 {% endblock %}

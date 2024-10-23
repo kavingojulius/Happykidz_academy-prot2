@@ -12,4 +12,5 @@ urlpatterns = [
     path('downloads', downloads ,name='downloads'),
     path('admission', admission, name='admission'),
     path('admission_success', admission_success, name='admission_success'),
+    path('Quit', quit, name='quit'),
 ]

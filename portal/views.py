@@ -128,7 +128,11 @@ def log_in(request):
 
         if user is not None:
             login(request,user)
-            return redirect('portal')
+            # Check if the user is a superuser
+            if user.is_superuser:
+                return redirect('admin')  # Redirect to the admin page if superuser
+            else:
+                return redirect('portal')  # Redirect to the portal page for other users
         else:
             return redirect('log_in')
         

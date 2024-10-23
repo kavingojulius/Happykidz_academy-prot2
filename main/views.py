@@ -73,3 +73,8 @@ def admission(request):
 def admission_success(request):    
     return render(request, 'main/admission_success.html')
 
+def quit(request):
+    return render(request, 'main/Quit.html')
+
+
+

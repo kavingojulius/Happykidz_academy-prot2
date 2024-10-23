@@ -1,0 +1,436 @@
+{% extends 'main/base.html' %}
+
+{% load static %}
+
+{% block title %} Home Page {% endblock %}
+
+{% block content %}
+
+    
+    <!-- Hero Start 1 -->
+    <div class="container-fluid p-0 mb-0">
+        <div class="row align-items-center m-0">                   
+            <div class="position-relative">
+                <!-- Full viewport height and ensure no padding/margins around the image -->
+                <img class="img-fluid" src="{% static 'media/carousel-1.jpg' %}" alt="Hero Image" style="width:100%; height:100vh; object-fit: cover; margin: 0; padding: 0;">
+                
+                <!-- Dark overlay and text positioning -->
+                <div class="position-absolute top-0 start-0 h-100 d-flex align-items-center" style="background: rgba(0, 0, 0, .2); width: 100%;">
+                    <div class="container-fluid">
+                        <div class="row justify-content-start">
+                            {% for items in landing_page_text %}
+                            <div class="col-10 col-lg-8">
+                                <h3 class=" text-white animated slideInDown mb-4">{{items.title}}</h3>
+                                <p class="fs-6 fw-medium text-white mb-4 pb-2">{{items.description}}.</p>
+                                <a href="#" class="btn btn-primary rounded-pill py-sm-3 px-sm-5 me-3 animated slideInLeft">Learn More</a>
+                                <a href="#" class="btn btn-dark rounded-pill py-sm-3 px-sm-5 animated slideInRight">Our Classes</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>                                                                                
+        </div>
+    </div>
+    <!-- Hero End -->
+
+
+    <!-- Events start -->
+        <!-- Events Carousel -->
+            <div id="eventCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="8000"> <!-- Set to 8 seconds -->
+                <div class="carousel-inner">
+                    <!-- Check if events exist -->
+                    {% if events %}
+                        {% for event in events %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %} smooth-scroll">
+                                <!-- Single event content -->
+                                <div class="container my-5 py-5 bg-secondary text-white position-relative rounded">
+                                    <!-- Event Header -->
+                                    <div class="position-absolute top-0 start-50" style="transform: translate(-50%, -50%);">
+                                        <button class="btn btn-secondary rounded-pill text-white fw-bold p-3 fs-6" style="font-style: oblique;">
+                                            Upcoming Event
+                                        </button>
+                                    </div>
+
+                                    <div class="row g-5 align-items-center">
+                                        <!-- Event Image -->
+                                        <div class="col-md-6">
+                                            <img src="{{ event.image.url }}" class="img-fluid rounded w-100 h-100" alt="Event Image" style="object-fit: cover;">
+                                        </div>
+
+                                        <!-- Event Details -->
+                                        <div class="col-md-6">
+                                            <div class="d-flex mb-3">
+                                                <div class="text-center me-4">
+                                                    <div class="fs-4 fw-bold" id="days-{{ forloop.counter0 }}">00</div>
+                                                    <div>Days</div>
+                                                </div>
+                                                <div class="text-center me-4">
+                                                    <div class="fs-4 fw-bold" id="hours-{{ forloop.counter0 }}">00</div>
+                                                    <div>Hr</div>
+                                                </div>
+                                                <div class="text-center me-4">
+                                                    <div class="fs-4 fw-bold" id="minutes-{{ forloop.counter0 }}">00</div>
+                                                    <div>Min</div>
+                                                </div>
+                                                <div class="text-center">
+                                                    <div class="fs-4 fw-bold" id="seconds-{{ forloop.counter0 }}">00</div>
+                                                    <div>Sec</div>
+                                                </div>
+                                                <span class="ms-3 align-self-center fs-5" style="font-style:italic;">Remaining</span>
+                                            </div>
+                                            
+
+                                            <h3 class="fw-bold">{{ event.title }}</h3>
+                                            <p class="fs-6">{{ event.content }}</p>
+                                            <a href="{% url 'events' %}" class="btn btn-outline-light fw-bold">View all events</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- No events fallback -->
+                        <div class="carousel-item active">
+                            <div class="container my-5 py-5 bg-secondary text-white position-relative rounded">
+                                <h2 class="fw-bold text-center">No events</h2>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Carousel Controls -->
+                <button class="carousel-control-prev custom-carousel-control" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next custom-carousel-control" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+
+            </div>
+
+        <!-- Custom Styles -->
+
+            <style>
+                .custom-carousel-control {
+                    background-color: orange;
+                    width: 50px; /* Reduce width */
+                    height: 50px; /* Reduce height */
+                    border-radius: 50%; /* Make it circular */
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: absolute;
+                    top: 50%; /* Center vertically */
+                    transform: translateY(-50%); /* Adjust for perfect centering */
+                }
+                
+                /* Make the control icons smaller */
+                .carousel-control-prev-icon,
+                .carousel-control-next-icon {
+                    background-size: 50%;
+                }
+
+                /* Position previous and next buttons properly */
+                .carousel-control-prev {
+                    left: 10px; /* Adjust to your preference */
+                }
+
+                .carousel-control-next {
+                    right: 10px; /* Adjust to your preference */
+                }
+                .carousel-item img {
+                    max-height: 300px; /* Set a max height for the images */
+                    width: auto;       /* Maintain aspect ratio */
+                    object-fit: cover; /* Cover the area without stretching */
+                }
+                
+
+                /* Smooth transition effect */
+                .smooth-scroll {
+                    transition: transform 2s ease-in-out; /* Adjust duration and timing function */
+                }
+            </style>
+
+        <!-- JavaScript for Smooth Scroll Effect and Autoplay -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    var carousel = document.querySelector('#eventCarousel');
+                    var carouselItems = carousel.querySelectorAll('.carousel-item');
+                    var currentIndex = 0; // Track the current index
+
+                    // Autoplay function
+                    function autoplayCarousel() {
+                        setInterval(function() {
+                            // Calculate the next index
+                            currentIndex = (currentIndex + 1) % carouselItems.length; // Loop back to first item
+                            var nextItem = carouselItems[currentIndex];
+                            
+                            // Use Bootstrap's carousel methods to slide to the next item
+                            var carouselInstance = bootstrap.Carousel.getInstance(carousel);
+                            carouselInstance.to(currentIndex); // Slide to the next item
+                        }, 8000); // 8 seconds
+                    }
+
+                    // Start autoplay
+                    autoplayCarousel();
+
+                    // Existing slide event listener for smooth transition
+                    carousel.addEventListener('slide.bs.carousel', function (event) {
+                        var nextItem = carouselItems[event.to];
+
+                        // Apply the smooth scroll effect
+                        if (nextItem) {
+                            nextItem.style.transform = 'translateY(0)'; // Reset position
+                        }
+
+                        // Reset the transform on the items after transition
+                        setTimeout(() => {
+                            carouselItems.forEach(item => {
+                                item.style.transform = ''; // Clear styles after transition
+                            });
+                        }, 500); // Match this with your transition duration
+                    });
+                });
+            </script>
+
+        <!-- Events end -->
+
+        <!-- JavaScript Countdown -->
+            <script>
+                // Event end timestamps from Django view
+                var eventEndTimestamps = {{ event_end_timestamps|safe }}.map(ts => ts * 1000); // Convert to milliseconds
+            
+                // Function to calculate remaining time and update the HTML
+                function updateCountdown() {
+                    var now = new Date().getTime(); // Current time in milliseconds
+            
+                    eventEndTimestamps.forEach((eventEndTimestamp, index) => {
+                        var timeRemaining = eventEndTimestamp - now;
+            
+                        // Update only if the element exists
+                        if (timeRemaining > 0) {
+                            var days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                            var hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            var minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                            var seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+            
+                            document.getElementById(`days-${index}`).innerHTML = days;
+                            document.getElementById(`hours-${index}`).innerHTML = hours;
+                            document.getElementById(`minutes-${index}`).innerHTML = minutes;
+                            document.getElementById(`seconds-${index}`).innerHTML = seconds;
+                        } else {
+                            // Handle countdown completion for this specific event
+                            document.querySelector(`#event-${index}`).innerHTML = '<h2 class="fw-bold text-center">Event Ended</h2>';
+                        }
+                    });
+                }
+            
+                // Update the countdown every 1 second
+                setInterval(updateCountdown, 1000);
+            
+                // Run the function immediately so that the time shows right away
+                updateCountdown();
+            </script>
+
+    <!-- Events end -->
+    
+
+    <!-- About Start -->
+    <div class="container-xxl py-5" style="background-color:rgb(234, 231, 217);">
+    <div class="container">
+    <div class="row g-5 align-items-center">
+        <div class="col-lg-6 wow fadeInUp" data-wow-delay="0.1s">
+            <h3 class="mb-4">Welcome to Happy Kidz Academy</h3>
+            <p>Learn More About Our Work And Our Cultural Activities</p>
+            <p class="mb-4">It's my pleasure to welcome you to Happy Kidz Academy. We are committed to providing your children with quality programs, activities, and services that will enhance and enrich your child's academic experience.</p>
+            <div class="row g-4 align-items-center">
+                <div class="col-sm-6">
+                    <a class="btn btn-primary rounded-pill py-3 px-5" href="{% url 'about_us' %}">Know more About Us</a>
+                </div>
+                <div class="col-sm-6">
+                    <div class="d-flex align-items-center">
+                        <img class="rounded-circle flex-shrink-0" src="{% static 'media/user.jpg' %}" alt="" style="width: 45px; height: 45px;">
+                        <div class="ms-3">
+                            <h6 class="text-primary mb-1">John Doe</h6>
+                            <small>Head Teacher</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 about-img wow fadeInUp" data-wow-delay="0.5s">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <a class="btn btn-primary rounded-pill py-3 px-5" href="{% url 'gallery' %}">Gallery</a>
+                    <img class="img-fluid w-75 rounded-circle bg-light p-3" src="{% static 'media/about-1.jpg' %}" alt="">                    
+                </div>
+                <div class="col-6 text-start" style="margin-top: -150px;">
+                    <img class="img-fluid w-100 rounded-circle bg-light p-3" src="{% static 'media/about-2.jpg' %}" alt="">
+                    <a class="btn btn-primary rounded-pill py-3 px-5" href="{% url 'downloads' %}">Downloads</a>
+                </div>
+                <div class="col-6 text-end" style="margin-top: -150px;">
+                    <img class="img-fluid w-100 rounded-circle bg-light p-3" src="{% static 'media/about-3.jpg' %}" alt="">
+                    <a class="btn btn-primary rounded-pill py-3 px-5" href="{% url 'news' %}">News</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    <!-- About End -->
+
+    <!-- Curriculum Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 600px;">
+                <h1 class="mb-3">Our Curriculum</h1>
+                <p>Eirmod sed ipsum dolor sit rebum labore magna erat. Tempor ut dolore lorem kasd vero ipsum sit eirmod sit. Ipsum diam justo sed rebum vero dolor duo.</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="facility-item">
+                        <div class="facility-icon bg-primary">
+                            <span class="bg-primary"></span>
+                            <i class="fa fa-bus-alt fa-3x text-primary"></i>
+                            <span class="bg-primary"></span>
+                        </div>
+                        <div class="facility-text bg-primary">
+                            <h3 class="text-primary mb-3">Day Care</h3>
+                            <p class="mb-0">Eirmod sed ipsum dolor sit rebum magna erat lorem kasd vero ipsum sit</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="facility-item">
+                        <div class="facility-icon bg-success">
+                            <span class="bg-success"></span>
+                            <i class="fa fa-futbol fa-3x text-success"></i>
+                            <span class="bg-success"></span>
+                        </div>
+                        <div class="facility-text bg-success">
+                            <h3 class="text-success mb-3">Playgroup</h3>
+                            <p class="mb-0">Eirmod sed ipsum dolor sit rebum magna erat lorem kasd vero ipsum sit</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="facility-item">
+                        <div class="facility-icon bg-warning">
+                            <span class="bg-warning"></span>
+                            <i class="fa fa-home fa-3x text-warning"></i>
+                            <span class="bg-warning"></span>
+                        </div>
+                        <div class="facility-text bg-warning">
+                            <h3 class="text-warning mb-3">Kindergaten</h3>
+                            <p class="mb-0">Eirmod sed ipsum dolor sit rebum magna erat lorem kasd vero ipsum sit</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.7s">
+                    <div class="facility-item">
+                        <div class="facility-icon bg-info">
+                            <span class="bg-info"></span>
+                            <i class="fa fa-chalkboard-teacher fa-3x text-info"></i>
+                            <span class="bg-info"></span>
+                        </div>
+                        <div class="facility-text bg-info">
+                            <h3 class="text-info mb-3">Grade 1 - 3</h3>
+                            <p class="mb-0">Eirmod sed ipsum dolor sit rebum magna erat lorem kasd vero ipsum sit</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Curriculum End -->    
+
+    <!-- Admission section Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="bg-light rounded">
+                <div class="row g-0">
+                    <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s" style="min-height: 400px;">
+                        <div class="position-relative h-100">
+                            <img class="position-absolute w-100 h-100 rounded" src="{% static 'media/call-to-action.jpg' %}" style="object-fit: cover;">
+                        </div>
+                    </div>
+                    <div class="col-lg-6 wow fadeIn" data-wow-delay="0.5s">
+                        <div class="h-100 d-flex flex-column justify-content-center p-5">
+                            <h3 class="mb-4">Book Admission</h3>
+                            <p class="mb-4">Tempor erat elitr rebum at clita. Diam dolor diam ipsum sit. Aliqu diam amet diam et eos.
+                                Clita erat ipsum et lorem et sit, sed stet lorem sit clita duo justo magna dolore erat amet
+                            </p>
+                            <a class="btn btn-primary py-3 px-5" href="{% url 'admission' %}">Book Now<i class="fa fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Admission section End -->
+
+
+    <!-- Appointment Start -->
+    <div class="container-xxl py-5">
+        <div class="container">
+            <div class="bg-light rounded">
+                <div class="row g-0">
+                    <div class="col-lg-6 wow fadeIn" data-wow-delay="0.1s">
+                        <div class="h-100 d-flex flex-column justify-content-center p-5">
+                            <h3 class="mb-4">Make Appointment</h3>
+                            <form>
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control border-0" id="gname" placeholder="Gurdian Name">
+                                            <label for="gname">Gurdian Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-floating">
+                                            <input type="email" class="form-control border-0" id="gmail" placeholder="Gurdian Email">
+                                            <label for="gmail">Gurdian Email</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control border-0" id="cname" placeholder="Child Name">
+                                            <label for="cname">Child Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control border-0" id="cage" placeholder="Child Age">
+                                            <label for="cage">Child Admission</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="form-floating">
+                                            <textarea class="form-control border-0" placeholder="Leave a message here" id="message" style="height: 100px"></textarea>
+                                            <label for="message">Message</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button class="btn btn-primary w-100 py-3" type="submit">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 wow fadeIn d-flex flex-column justify-content-center" data-wow-delay="0.5s" style="">
+                        <div>
+                            <p class="fw-bold fs-4" style="font-style:italic;">Get to know the welfare of your child at school</p>
+                            <p class="fs-5">Make an appointment with the school to see the environment at which you child learns</p>
+                            <!-- <img class="w-100 h-50 rounded" src="{% static 'media/appointment.jpg' %}" style="object-fit: cover;">                             -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Appointment End -->
+
+{% endblock %}
