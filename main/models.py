@@ -89,6 +89,8 @@ class StudentAdmission(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.applying_class}"
+    class Meta:
+        verbose_name_plural = 'Student Admission Requests'
     
 class News(models.Model):
     title = models.CharField(max_length=255)
@@ -98,4 +100,7 @@ class News(models.Model):
     
     def __str__(self):
         return self.title
+    
+    class Meta:
+        verbose_name_plural = 'News'
 

@@ -6,7 +6,6 @@ from django.contrib.auth import get_user_model  # Use this to get the CustomUser
 from django.conf import settings
 # Get the custom user model
 
-
 # Creating extra field(s) for User in the admin panel
 class CustomUser(AbstractUser):
     reg_number = models.CharField(max_length=20, unique=True, blank=True, null=True)    
@@ -48,6 +47,8 @@ class DocTitle(models.Model):
         super().save(*args, **kwargs)
         if self.document: # Check if there is a document uploaded
             self.process_document()
+    class Meta:
+        verbose_name_plural = 'Document Title'
 
     def process_document(self):
         if self.type == 'student_details':
@@ -100,6 +101,7 @@ class StudentDet(models.Model):
 
     class Meta:
         unique_together = ('doc_title', 'name')  # Ensures unique name per document
+        verbose_name_plural = 'Student Details'
 
     def __str__(self):
         return self.name

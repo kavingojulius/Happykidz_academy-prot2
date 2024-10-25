@@ -2,10 +2,56 @@
 
 {% load static %}
 
-{% block title %} Vision - Mission Page {% endblock %}
+{% block title %} Vision & Mission Page {% endblock %}
 
 {% block content %}
+<div class="container py-5">
+    <h1 class="display-4 text-center fw-bold">Our Vision & Mission</h1>
+    <p class="lead text-center">Guiding Principles for Excellence in Education</p>
+    <hr class="my-4">
 
+    <!-- Vision Section -->
+    <div class="row my-5">
+        <div class="col-md-6">
+            <h2 class="fw-bold">Our Vision</h2>
+            <p>
+                Our vision is to be a leading educational institution that empowers students to reach their full potential, both academically and personally. 
+                We aim to cultivate a culture of excellence where every student can excel in a dynamic, innovative, and inclusive environment.
+            </p>
+            <p>
+                Through our commitment to academic rigor, holistic development, and social responsibility, we envision producing future leaders who will make a positive impact on the world.
+            </p>
+        </div>
+        <div class="col-md-6">
+            <img src="{% static 'media/about-2.jpg' %}" alt="Vision" class="img-fluid rounded">
+        </div>
+    </div>
 
-
+    <!-- Mission Section -->
+    <div class="row my-5">
+        <div class="col-md-6">
+            <img src="{% static 'media/about-3.jpg' %}" alt="Mission" class="img-fluid rounded">
+        </div>
+        <div class="col-md-6">
+            <h2 class="fw-bold">Our Mission</h2>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <strong>Excellence in Education:</strong> To provide a comprehensive and well-rounded education that promotes critical thinking, creativity, and a passion for lifelong learning.
+                </li>
+                <li class="list-group-item">
+                    <strong>Inclusive Environment:</strong> To foster a safe, nurturing, and inclusive environment where all students feel valued, respected, and supported in their individual growth.
+                </li>
+                <li class="list-group-item">
+                    <strong>Character Development:</strong> To instill strong moral values, integrity, and responsibility in our students, preparing them to be ethical and compassionate leaders in society.
+                </li>
+                <li class="list-group-item">
+                    <strong>Global Citizenship:</strong> To encourage students to engage with the world as responsible global citizens, understanding and respecting diverse perspectives, cultures, and challenges.
+                </li>
+                <li class="list-group-item">
+                    <strong>Innovation and Technology:</strong> To integrate cutting-edge technology and innovative teaching methods that prepare students for success in an ever-evolving, digital world.
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
 {% endblock %}
