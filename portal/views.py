@@ -13,9 +13,11 @@ from django.contrib.auth import get_user_model
 from .models import *
 from main.models import StudentAdmission
 from django.http import HttpResponse
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from main.models import StudentAdmission
 import io
 
@@ -67,6 +69,12 @@ def download_admissions_pdf(request):
     buffer = io.BytesIO()
     pdf = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
+
+    # Define the header
+    styles = getSampleStyleSheet()
+    header = Paragraph("Admission Requests Report", styles['Title'])
+    subheader = Paragraph("List of all admission requests submitted by prospective students.", styles['BodyText'])
+    elements.extend([header, subheader])
 
     # Define the table data
     admissions = StudentAdmission.objects.all()
