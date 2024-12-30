@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect
 from .models import *
 from .forms import *
-
-# Create your views here.
 from django.utils import timezone
 from .models import Event, LandingPageText
+
 
 def homepage(request):
     # Get the landing page text
@@ -14,12 +13,12 @@ def homepage(request):
     events = Event.objects.filter(end_time__gte=timezone.now()).order_by('start_time')
 
     # Create a list of end timestamps for all events
-    event_end_timestamps = [event.end_time.timestamp() for event in events]
+    event_end_timestamps = [event.end_time.timestamp() for event in events]    
 
     return render(request, 'main/index.html', {
         'events': events,  # Pass all events here
         'event_end_timestamps': event_end_timestamps,  # List of end timestamps for JS countdown
-        'landing_page_text': landing_page_text,
+        'landing_page_text': landing_page_text,        
     })
 
 def about_us(request):

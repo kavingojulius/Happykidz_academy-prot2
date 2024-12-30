@@ -117,11 +117,11 @@
                             {% if request.user.is_superuser %}
                                 <a href="{% url 'admin' %}" class="nav-item nav-link">Admin</a>
                             {% else %}
-                                <a href="{% url 'portal' %}" class="nav-item nav-link">Portal</a>
+                                <a href="{% url 'portal' %}" class="nav-item nav-link">Parents Portal</a>
                             {% endif %}
                             <a href="{% url 'logout' %}" class="nav-item nav-link">Logout</a>
                         {% else %}
-                            <a href="{% url 'log_in' %}" class="nav-item nav-link">Portal</a>
+                            <a href="{% url 'log_in' %}" class="nav-item nav-link">Parents Portal</a>
                         {% endif %}
 
                         <a href="{% url 'contact_us' %}" class="nav-item nav-link">Contact Us</a>

@@ -14,11 +14,14 @@
                     <div class="card mb-3">
                         <div class="card-body">
 
-                            <div class="pt-4 pb-2">
-                                <h5 class="card-title text-center pb-0 fs-4">Login to your Account</h5>                
+                            <div class="pt-4 pb-2 text-center">
+                                <h5 class="card-title pb-0 fs-4">Login to your Account</h5>
+                                <p class="small text-muted mt-2">
+                                    Please use the login credentials provided by the school management. 
+                                    For any issues, contact us at <strong><a href="tel:+254794699147" style="text-decoration: none; color: #006400;">0794699147</a></strong>.
+                                </p>                
                             </div>
 
-                            <!-- <form class="row g-3 needs-validation" novalidate> -->
                             <form method="post">
                                 {% csrf_token %}
                     
@@ -35,12 +38,8 @@
                                 </div>
                                 
                                 <div class="col-12 mt-4">                
-                                    <button class="w-100 btn " type="submit" style="background-color: #006400; color: #fff;">sign in</button>
+                                    <button class="w-100 btn" type="submit" style="background-color: #006400; color: #fff;">Sign In</button>
                                 </div>
-
-                                <!-- <div class="col-12 mt-4">
-                                <p class="small mb-0">Don't have an account? <a href="">Sign Up</a></p>
-                            </div> -->
                             
                             </form>
 

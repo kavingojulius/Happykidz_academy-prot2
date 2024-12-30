@@ -16,7 +16,7 @@
         {% for student in students %}
             <li>
                 <strong>Name:</strong> {{ student.name }} <br>
-                <strong>Grade:</strong> {{ student.grade }} <br>
+                <strong>Grade:</strong> {{ student.class_name }} <br>
                 <strong>Reg Number:</strong> {{ student.reg_number }} <br>
             </li>
         {% empty %}
@@ -36,6 +36,22 @@
             <p>No fee payment records found for your account.</p>
         {% endfor %}
     </ul>
+
+    <!-- Health Progress Section -->
+    <h5>Health Progress:</h5>
+    <ul>
+        {% for record in health_records %}
+            <li>                
+                <strong>Health Status:</strong> {{ record.health_status }} <br>
+                <strong>Date Recorded:</strong> {{ record.date_recorded }} <br>
+                <strong>Notes:</strong> {{ record.notes|default:"No notes available." }} <br>
+            </li>
+        {% empty %}
+            <p>No health progress records found for your account.</p>
+        {% endfor %}
+    </ul>
+
+
 
     <a href="{% url 'change_password' %}" class="btn btn-primary">Change Password</a>
 
