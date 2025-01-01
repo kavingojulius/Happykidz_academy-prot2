@@ -38,12 +38,37 @@ def portal(request):
     # Mark unread messages as read when the admin opens the chat
     Message.objects.filter(sender=request.user, receiver=request.user, read=False).update(read=True)
 
+
+    results_data = []
+    students = Results.objects.values('student').distinct()  # Get distinct students
+
+    for student in students:
+        student_results = Results.objects.filter(student=student['student'])
+        total_marks = sum(result.marks for result in student_results)
+        results_data.append({
+            'student': student_results.first().student,
+            'results': student_results,
+            'total_marks': total_marks
+        })
+
+
+
+
      # Get the current user's reg_number
     reg_number = request.user.reg_number
 
     # Filter the students based on the reg_number
     students = StudentDet.objects.filter(reg_number=reg_number)
-    fee_payments = Fee.objects.filter(reg_number=reg_number)  # Query fee payment data
+
+    # Get the student with the matching reg_number (assuming unique reg_number)
+    try:
+        student = StudentDet.objects.get(reg_number=reg_number)
+    except StudentDet.DoesNotExist:
+        student = None
+
+
+    transactions = PayFee.objects.filter(student=student)
+    total_amount = sum(transaction.amount for transaction in transactions)    
     health_records = HealthProgress.objects.filter(student__in=students)
 
     if request.method == 'POST':
@@ -56,8 +81,10 @@ def portal(request):
         'messages': messages,
         'unread_count': unread_count,  # Pass unread count to the template
         'students': students,
-        'fee_payments': fee_payments,
+        'transactions': transactions,
+        'total_amount': total_amount,
         'health_records': health_records,
+        'results_data': results_data,
     })
 
 @login_required

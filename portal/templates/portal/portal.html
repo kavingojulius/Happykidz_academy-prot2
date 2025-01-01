@@ -24,19 +24,29 @@
         {% endfor %}
     </ul>
 
-    <h5>Current Term Fee Payment Details:</h5>
-    <ul>
-        {% for payment in fee_payments %}
-            <li>
-                <strong>Amount Paid:</strong> {{ payment.amount }} <br>
-                <strong>Balance:</strong> {{ payment.balance }} <br>
-                <strong>Date of Payment:</strong> {{ payment.date_paid }} <br>
-            </li>
-        {% empty %}
-            <p>No fee payment records found for your account.</p>
-        {% endfor %}
-    </ul>
-
+    <h5>Fee Payment Details:</h5>
+    <table>
+        <thead>
+            <tr>
+                <th>Term</th>
+                <th>Date Paid</th>
+                <th>Transaction Mode</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.term }}</td>
+                <td>{{ transaction.date_paid }}</td>
+                <td>{{ transaction.transaction_mode }}</td>
+                <td>{{ transaction.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h6>Total Amount Paid: {{ total_amount }}</h6>
     <!-- Health Progress Section -->
     <h5>Health Progress:</h5>
     <ul>
@@ -50,6 +60,40 @@
             <p>No health progress records found for your account.</p>
         {% endfor %}
     </ul>
+
+
+    <h2>Student Results</h2>
+
+    {% for data in results_data %}
+        <h3>Student: {{ data.student }}</h3>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Term</th>
+                    <th>Term Section</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in data.results %}
+                <tr>
+                    <td>{{ result.class_level }}</td>
+                    <td>{{ result.term }}</td>
+                    <td>{{ result.term_section }}</td>
+                    <td>{{ result.subject }}</td>
+                    <td>{{ result.marks }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4"><strong>Total Marks</strong></td>
+                    <td><strong>{{ data.total_marks }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    {% endfor %}
+
 
 
 

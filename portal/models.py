@@ -276,3 +276,86 @@ class FeePay(models.Model):
         """Add a new payment to the amounts list."""
         self.amounts.append(amount)
         self.save()
+
+
+class PayFee(models.Model):
+    TERM_CHOICES = [
+        ('Term 1', 'Term 1'),
+        ('Term 2', 'Term 2'),
+        ('Term 3', 'Term 3'),
+    ]
+
+    student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="pay_fee_records")
+    term = models.CharField(max_length=50, choices=TERM_CHOICES)
+    date_paid = models.DateField(blank=True, null=True)
+    transaction_mode = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.student.reg_number} - {self.term} ({self.date_paid})"
+
+    
+
+class Results(models.Model):
+
+    TERM_CHOICES = [
+        ('Term 1', 'Term 1'),
+        ('Term 2', 'Term 2'),
+        ('Term 3', 'Term 3'),
+    ]       
+
+    TERM_SECTION_CHOICES = [
+        ('Opening', 'Opening'),
+        ('Mid Term', 'Mid Term'),
+        ('End Term', 'End Term'),
+    ]
+
+    Subject_Choices = [
+        ('Math', 'Mathematics'),
+        ('English', 'English'), 
+        ('Science', 'Science'),
+    ]
+
+    student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="results_records")
+    term = models.CharField(max_length=50, choices=TERM_CHOICES)
+    term_section = models.CharField(max_length=50, choices=TERM_SECTION_CHOICES)
+    date_recorded = models.DateField(blank=True, null=True)
+    subject = models.CharField(max_length=50, choices=Subject_Choices)
+    marks =  models.PositiveIntegerField()
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.student.reg_number} - {self.term} ({self.date_recorded})"
+        
+
+class Terms(models.Model):
+    term = models.CharField(max_length=50 )
+    term_section = models.CharField(max_length=50 )
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+    year = models.DateField(blank=True, null=True)
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.term} - {self.term_section} ({self.start_date} to {self.end_date})"
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
