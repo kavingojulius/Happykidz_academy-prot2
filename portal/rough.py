@@ -464,7 +464,17 @@ def get_messages(request, user_id=None):
 
 
 
+results_data = []
+    students = Results.objects.values('student').distinct()  # Get distinct students
 
+    for student in students:
+        student_results = Results.objects.filter(student=student['student'])
+        total_marks = sum(result.marks for result in student_results)
+        results_data.append({
+            'student': student_results.first().student,
+            'results': student_results,
+            'total_marks': total_marks
+        })
 
 
 

@@ -6,6 +6,8 @@ from django.dispatch import receiver
 import openpyxl
 from django.contrib.auth import get_user_model  # Use this to get the CustomUser model
 from django.conf import settings
+from django.core.exceptions import ValidationError
+
 # Get the custom user model
 
 # Creating extra field(s) for User in the admin panel
@@ -297,33 +299,13 @@ class PayFee(models.Model):
     def __str__(self):
         return f"{self.student.reg_number} - {self.term} ({self.date_paid})"
 
-    
-
 class Results(models.Model):
-
-    TERM_CHOICES = [
-        ('Term 1', 'Term 1'),
-        ('Term 2', 'Term 2'),
-        ('Term 3', 'Term 3'),
-    ]       
-
-    TERM_SECTION_CHOICES = [
-        ('Opening', 'Opening'),
-        ('Mid Term', 'Mid Term'),
-        ('End Term', 'End Term'),
-    ]
-
-    Subject_Choices = [
-        ('Math', 'Mathematics'),
-        ('English', 'English'), 
-        ('Science', 'Science'),
-    ]
-
+    
     student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="results_records")
-    term = models.CharField(max_length=50, choices=TERM_CHOICES)
-    term_section = models.CharField(max_length=50, choices=TERM_SECTION_CHOICES)
+    term = models.ForeignKey('Term', on_delete=models.CASCADE, related_name="results_records")
+    term_section = models.ForeignKey('TermSection', on_delete=models.CASCADE, related_name="results_records")
     date_recorded = models.DateField(blank=True, null=True)
-    subject = models.CharField(max_length=50, choices=Subject_Choices)
+    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, related_name="results_records")
     marks =  models.PositiveIntegerField()
 
     class Meta:
@@ -331,11 +313,40 @@ class Results(models.Model):
 
     def __str__(self):
         return f"{self.student.reg_number} - {self.term} ({self.date_recorded})"
-        
+    
+    def clean(self):
+        # Validate against duplicate subject, term, term section, and year (ignore marks)
+        existing_results = Results.objects.filter(
+            student=self.student,
+            term=self.term,
+            term_section=self.term_section,
+            subject=self.subject,
+            term__year=self.term.year,  # Check the year
+        )
+        if self.pk:
+            existing_results = existing_results.exclude(pk=self.pk)  # Exclude current instance if editing
+        if existing_results.exists():
+            raise ValidationError(
+                f"A result for {self.student.name} in {self.subject} "
+                f"({self.term} - {self.term_section}, Year: {self.term.year}) already exists."
+            )
 
-class Terms(models.Model):
-    term = models.CharField(max_length=50 )
-    term_section = models.CharField(max_length=50 )
+    def save(self, *args, **kwargs):
+        # Call the clean method to validate before saving
+        self.clean()
+        super().save(*args, **kwargs)
+
+class Subject(models.Model):
+    subject = models.CharField(max_length=50)    
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.subject}"
+
+class Term(models.Model):
+    term = models.CharField(max_length=50 )    
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     year = models.DateField(blank=True, null=True)
@@ -344,8 +355,16 @@ class Terms(models.Model):
         pass
 
     def __str__(self):
-        return f"{self.term} - {self.term_section} ({self.start_date} to {self.end_date})"
+        return f"{self.term}"
     
+class TermSection(models.Model):
+    term_section = models.CharField(max_length=50)        
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.term_section}"
 
 
 

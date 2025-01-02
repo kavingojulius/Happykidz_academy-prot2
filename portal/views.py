@@ -19,6 +19,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from main.models import StudentAdmission
+from django.db.models import Sum
 import io
 
 
@@ -38,33 +39,41 @@ def portal(request):
     # Mark unread messages as read when the admin opens the chat
     Message.objects.filter(sender=request.user, receiver=request.user, read=False).update(read=True)
 
-
-    results_data = []
-    students = Results.objects.values('student').distinct()  # Get distinct students
-
-    for student in students:
-        student_results = Results.objects.filter(student=student['student'])
-        total_marks = sum(result.marks for result in student_results)
-        results_data.append({
-            'student': student_results.first().student,
-            'results': student_results,
-            'total_marks': total_marks
-        })
-
-
-
-
-     # Get the current user's reg_number
+ # Get the current user's reg_number
     reg_number = request.user.reg_number
 
     # Filter the students based on the reg_number
     students = StudentDet.objects.filter(reg_number=reg_number)
 
-    # Get the student with the matching reg_number (assuming unique reg_number)
+
+# Get the student with the matching reg_number (assuming unique reg_number)
     try:
         student = StudentDet.objects.get(reg_number=reg_number)
     except StudentDet.DoesNotExist:
         student = None
+
+    results_data = []
+    if student:
+        # Get results grouped by term and term section
+        results = Results.objects.filter(student=student).select_related('term', 'term_section', 'subject')
+        grouped_results = {}
+        for term in results.values_list('term__term', flat=True).distinct():
+            term_results = results.filter(term__term=term)
+            grouped_results[term] = {}
+            for section in term_results.values_list('term_section__term_section', flat=True).distinct():
+                section_results = term_results.filter(term_section__term_section=section)
+                total_marks = section_results.aggregate(total=Sum('marks'))['total']
+                grouped_results[term][section] = {
+                    'results': section_results,
+                    'total_marks': total_marks,
+                }
+
+        results_data = grouped_results
+
+
+    
+
+    
 
 
     transactions = PayFee.objects.filter(student=student)

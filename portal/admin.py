@@ -93,9 +93,7 @@ class PayFeeAdmin(admin.ModelAdmin):
             'fields': ('student', 'term', 'date_paid', 'transaction_mode', 'amount')
         }),
     )
-    
-    # Optionally make some fields readonly
-    # readonly_fields = ('student', 'term')  # Just an example, you can adjust it
+        
     
     # Customize how the model is saved, if necessary
     def save_model(self, request, obj, form, change):
@@ -108,11 +106,23 @@ class ResultAdmin(admin.ModelAdmin):
     list_filter = ('term', 'term_section', 'subject')
     search_fields = ('student__name', 'student__reg_number')
 
-@admin.register(Terms)
-class TermsAdmin(admin.ModelAdmin):
-    list_display = ('term', 'term_section', 'start_date', 'end_date', 'year')
-    list_filter = ('year', 'term_section')
-    search_fields = ('term', 'term_section')
+@admin.register(Term)
+class TermAdmin(admin.ModelAdmin):
+    list_display = ('term', 'start_date', 'end_date', 'year')
+    list_filter = ('term','year', )
+    search_fields = ('term','year',)
+
+@admin.register(TermSection)
+class TermSectionAdmin(admin.ModelAdmin):
+    list_display = ('term_section',)
+    list_filter = ('term_section', )
+    search_fields = ('term_section',)
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('subject',)
+    list_filter = ('subject', )
+    search_fields = ('subject',)
 
 
 

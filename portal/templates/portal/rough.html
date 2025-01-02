@@ -149,3 +149,44 @@
 </style>
 
 {% endblock %}
+
+
+
+<h2>Student Results</h2>
+
+    {% for data in results_data %}
+    {% for student in students %}
+        <h3>Student: {{ data.student }}</h3>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Class</th>
+                    <th>Term</th>
+                    <th>Term Section</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in data.results %}
+                <tr>
+                    <td>{{ student.class_name }}</td>
+                    <td>{{ result.term }}</td>
+                    <td>{{ result.term_section }}</td>
+                    <td>{{ result.subject }}</td>
+                    <td>{{ result.marks }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4"><strong>Total Marks</strong></td>
+                    <td><strong>{{ data.total_marks }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    {% endfor %}
+    {% endfor %}
+
+
+
+
+

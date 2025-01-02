@@ -64,14 +64,14 @@
 
     <h2>Student Results</h2>
 
-    {% for data in results_data %}
-        <h3>Student: {{ data.student }}</h3>
+{% for term, sections in results_data.items %}
+    <h3>Term: {{ term }}</h3>
+    {% for section, data in sections.items %}
+        <h4>Term Section: {{ section }}</h4>
         <table border="1">
             <thead>
                 <tr>
                     <th>Class</th>
-                    <th>Term</th>
-                    <th>Term Section</th>
                     <th>Subject</th>
                     <th>Marks</th>
                 </tr>
@@ -79,21 +79,19 @@
             <tbody>
                 {% for result in data.results %}
                 <tr>
-                    <td>{{ result.class_level }}</td>
-                    <td>{{ result.term }}</td>
-                    <td>{{ result.term_section }}</td>
+                    <td>{{ result.student.class_name }}</td>
                     <td>{{ result.subject }}</td>
                     <td>{{ result.marks }}</td>
                 </tr>
                 {% endfor %}
                 <tr>
-                    <td colspan="4"><strong>Total Marks</strong></td>
+                    <td colspan="2"><strong>Total Marks</strong></td>
                     <td><strong>{{ data.total_marks }}</strong></td>
                 </tr>
             </tbody>
         </table>
     {% endfor %}
-
+{% endfor %}
 
 
 
