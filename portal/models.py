@@ -244,7 +244,6 @@ class HealthProgress(models.Model):
         return f"{self.student.name}'s Health Record on {self.date_recorded}"
 
 
-
 class FeePay(models.Model):
     student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="fee_records", null=True, blank=True)
     term = models.CharField(
@@ -281,17 +280,13 @@ class FeePay(models.Model):
 
 
 class PayFee(models.Model):
-    TERM_CHOICES = [
-        ('Term 1', 'Term 1'),
-        ('Term 2', 'Term 2'),
-        ('Term 3', 'Term 3'),
-    ]
-
+    
     student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="pay_fee_records")
-    term = models.CharField(max_length=50, choices=TERM_CHOICES)
+    term = models.ForeignKey('Term', on_delete=models.CASCADE, related_name="pay_fee_records")
     date_paid = models.DateField(blank=True, null=True)
     transaction_mode = models.CharField(max_length=100, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
     class Meta:
         pass

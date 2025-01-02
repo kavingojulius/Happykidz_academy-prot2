@@ -79,10 +79,10 @@ class FeePayAdmin(admin.ModelAdmin):
 @admin.register(PayFee)
 class PayFeeAdmin(admin.ModelAdmin):
     # Define what fields you want to display in the list view
-    list_display = ('student', 'term', 'date_paid', 'transaction_mode', 'amount')
+    list_display = ('student', 'term', 'date_paid', 'transaction_mode', 'amount', 'balance')
     
     # Add filters to easily filter records by 'term' and 'date_paid'
-    list_filter = ('term', 'date_paid')
+    list_filter = ('student__reg_number','term', 'date_paid')
     
     # Define which fields should be searchable in the admin
     search_fields = ('student__reg_number', 'term', 'date_paid')
@@ -90,7 +90,7 @@ class PayFeeAdmin(admin.ModelAdmin):
     # Optional: Allow editing the amount and transaction mode directly in the admin
     fieldsets = (
         (None, {
-            'fields': ('student', 'term', 'date_paid', 'transaction_mode', 'amount')
+            'fields': ('student', 'term', 'date_paid', 'transaction_mode', 'amount', 'balance')
         }),
     )
         
@@ -103,7 +103,7 @@ class PayFeeAdmin(admin.ModelAdmin):
 @admin.register(Results)
 class ResultAdmin(admin.ModelAdmin):
     list_display = ('student', 'term', 'term_section', 'subject', 'marks')
-    list_filter = ('term', 'term_section', 'subject')
+    list_filter = ('student__reg_number','term', 'term_section', 'subject')
     search_fields = ('student__name', 'student__reg_number')
 
 @admin.register(Term)

@@ -25,28 +25,40 @@
     </ul>
 
     <h5>Fee Payment Details:</h5>
-    <table>
-        <thead>
-            <tr>
-                <th>Term</th>
-                <th>Date Paid</th>
-                <th>Transaction Mode</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for transaction in transactions %}
-            <tr>
-                <td>{{ transaction.term }}</td>
-                <td>{{ transaction.date_paid }}</td>
-                <td>{{ transaction.transaction_mode }}</td>
-                <td>{{ transaction.amount }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    {% for key, data in fee_data.items %}
+        <h6>{{ data.term }} - {{ data.year }}</h6>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Term</th>
+                    <th>Year</th>
+                    <th>Date Paid</th>
+                    <th>Transaction Mode</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in data.transactions %}
+                <tr>
+                    <td>{{ transaction.term }}</td>
+                    <td>{{ data.year }}</td>
+                    <td>{{ transaction.date_paid }}</td>
+                    <td>{{ transaction.transaction_mode }}</td>
+                    <td>{{ transaction.amount }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4"><strong>Total</strong></td>
+                    <td><strong>{{ data.total_amount }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    {% endfor %}
+
     
-    <h6>Total Amount Paid: {{ total_amount }}</h6>
+    
+    
     <!-- Health Progress Section -->
     <h5>Health Progress:</h5>
     <ul>
@@ -64,34 +76,34 @@
 
     <h2>Student Results</h2>
 
-{% for term, sections in results_data.items %}
-    <h3>Term: {{ term }}</h3>
-    {% for section, data in sections.items %}
-        <h4>Term Section: {{ section }}</h4>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Class</th>
-                    <th>Subject</th>
-                    <th>Marks</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result in data.results %}
-                <tr>
-                    <td>{{ result.student.class_name }}</td>
-                    <td>{{ result.subject }}</td>
-                    <td>{{ result.marks }}</td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    <td colspan="2"><strong>Total Marks</strong></td>
-                    <td><strong>{{ data.total_marks }}</strong></td>
-                </tr>
-            </tbody>
-        </table>
+    {% for term, sections in results_data.items %}
+        <h3>Term: {{ term }}</h3>
+        {% for section, data in sections.items %}
+            <h4>Term Section: {{ section }}</h4>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in data.results %}
+                    <tr>
+                        <td>{{ result.student.class_name }}</td>
+                        <td>{{ result.subject }}</td>
+                        <td>{{ result.marks }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="2"><strong>Total Marks</strong></td>
+                        <td><strong>{{ data.total_marks }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endfor %}
     {% endfor %}
-{% endfor %}
 
 
 

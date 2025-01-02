@@ -190,3 +190,29 @@
 
 
 
+    <h5>Fee Payment Details:</h5>
+    <table>
+        <thead>
+            <tr>
+                <th>Term</th>
+                <th>Date Paid</th>
+                <th>Transaction Mode</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.term }}</td>
+                <td>{{ transaction.date_paid }}</td>
+                <td>{{ transaction.transaction_mode }}</td>
+                <td>{{ transaction.amount }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h6>Total Amount Paid: {{ total_amount }}</h6>
+
+
+

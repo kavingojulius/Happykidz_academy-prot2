@@ -19,7 +19,9 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from main.models import StudentAdmission
-from django.db.models import Sum
+from django.db.models import Sum, F
+from django.db.models.functions import ExtractYear
+from collections import defaultdict
 import io
 
 
@@ -70,10 +72,22 @@ def portal(request):
 
         results_data = grouped_results
 
-
-    
-
-    
+    # Group fees by term and year
+    fee_data = {}
+    if student:
+        # Group fees by term and year
+        fees = PayFee.objects.filter(student=student).annotate(year=ExtractYear('date_paid'))
+        for fee in fees:
+            key = f"{fee.term.term} - {fee.year}"
+            if key not in fee_data:
+                fee_data[key] = {
+                    'term': fee.term.term,
+                    'year': fee.year,
+                    'transactions': [],
+                    'total_amount': 0
+                }
+            fee_data[key]['transactions'].append(fee)
+            fee_data[key]['total_amount'] += fee.amount or 0
 
 
     transactions = PayFee.objects.filter(student=student)
@@ -94,6 +108,7 @@ def portal(request):
         'total_amount': total_amount,
         'health_records': health_records,
         'results_data': results_data,
+        'fee_data': fee_data,  # Pass grouped fee data to the template
     })
 
 @login_required
