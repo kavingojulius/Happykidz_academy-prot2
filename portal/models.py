@@ -107,31 +107,9 @@ class DocTitle(models.Model):
 # The student details (has the same fields as the students excel file)
 class StudentDet(models.Model):
 
-    DOCUMENT_TYPE_CHOICES = [
-        ('playgroup', 'Playgroup'),
-        ('pp1', 'pp1'),
-        ('pp2', 'pp2'),
-        ('pp3', 'pp3'),
-        ('pp4', 'pp4'),
-        ('pp5', 'pp5'),
-        ('pp6', 'pp6'),
-        ('pp7', 'pp7'),
-        ('pp8', 'pp8'),
-        ('grade1', 'grade 1'),
-        ('grade2', 'grade 2'),
-        ('grade3', 'grade 3'),
-        ('grade4', 'grade 4'),
-        ('grade5', 'grade 5'),
-        ('grade6', 'grade 6'),
-        ('grade7', 'grade 7'),
-        ('grade8', 'grade 8'),
-
-    ]
-
     name = models.CharField(max_length=100)
-    reg_number = models.CharField(max_length=100, null=True, blank=True)
-    # grade = models.CharField(max_length=10)
-    class_name = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES, default='playgroup')  # New field to select document type --
+    reg_number = models.CharField(max_length=100, null=True, blank=True)    
+    class_level = models.ForeignKey('ClassLevel', on_delete=models.CASCADE, related_name='students', null=True, blank=True)
 
     class Meta:                 
         verbose_name_plural = 'Student Details'
@@ -278,6 +256,14 @@ class FeePay(models.Model):
         self.amounts.append(amount)
         self.save()
 
+class ClassLevel(models.Model):
+    name = models.CharField(max_length=50, unique=True)  # e.g., "Grade 1", "Grade 2"    
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.name}"
 
 class PayFee(models.Model):
     
@@ -285,14 +271,25 @@ class PayFee(models.Model):
     term = models.ForeignKey('Term', on_delete=models.CASCADE, related_name="pay_fee_records")
     date_paid = models.DateField(blank=True, null=True)
     transaction_mode = models.CharField(max_length=100, blank=True, null=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    balance = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)    
 
     class Meta:
         pass
 
     def __str__(self):
         return f"{self.student.reg_number} - {self.term} ({self.date_paid})"
+
+class TermFee(models.Model):
+    term = models.ForeignKey('Term', on_delete=models.CASCADE, related_name="term_fee_records")
+    class_level = models.ForeignKey('ClassLevel', on_delete=models.CASCADE, related_name="term_fee_records")
+    fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    year = models.DateField(blank=True, null=True)
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.class_level} {self.term} - {self.fee} - {self.year}"
 
 class Results(models.Model):
     

@@ -36,7 +36,7 @@ class DocTitleAdmin(admin.ModelAdmin):
     search_fields = ('title',)    
 
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'reg_number', 'class_name', ) #'doc_title'
+    list_display = ('name', 'reg_number', 'class_level', ) #'doc_title'
     search_fields = ('name',)
 
 admin.site.register(StudentDet, StudentAdmin)
@@ -76,10 +76,16 @@ class FeePayAdmin(admin.ModelAdmin):
         return obj.total_amount_paid()
 
 
+@admin.register(TermFee)
+class TermFeeAdmin(admin.ModelAdmin):
+    list_display = ('class_level', 'term', 'fee', 'year')
+    list_filter = ('class_level', 'term', 'year')
+    search_fields = ('class_level', 'term', 'year')
+
 @admin.register(PayFee)
 class PayFeeAdmin(admin.ModelAdmin):
     # Define what fields you want to display in the list view
-    list_display = ('student', 'term', 'date_paid', 'transaction_mode', 'amount', 'balance')
+    list_display = ('student', 'term', 'date_paid', 'transaction_mode', 'amount')
     
     # Add filters to easily filter records by 'term' and 'date_paid'
     list_filter = ('student__reg_number','term', 'date_paid')
@@ -90,7 +96,7 @@ class PayFeeAdmin(admin.ModelAdmin):
     # Optional: Allow editing the amount and transaction mode directly in the admin
     fieldsets = (
         (None, {
-            'fields': ('student', 'term', 'date_paid', 'transaction_mode', 'amount', 'balance')
+            'fields': ('student', 'term', 'date_paid', 'transaction_mode', 'amount',)
         }),
     )
         
@@ -99,6 +105,10 @@ class PayFeeAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
 
+
+@admin.register(ClassLevel)
+class ClassLevelAdmin(admin.ModelAdmin):    
+    search_fields = ('name', )    
 
 @admin.register(Results)
 class ResultAdmin(admin.ModelAdmin):

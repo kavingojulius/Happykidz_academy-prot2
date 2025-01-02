@@ -76,7 +76,8 @@ def portal(request):
     fee_data = {}
     if student:
         # Group fees by term and year
-        fees = PayFee.objects.filter(student=student).annotate(year=ExtractYear('date_paid'))
+        fees = PayFee.objects.filter(student=student).annotate(year=F('date_paid'))
+
         for fee in fees:
             key = f"{fee.term.term} - {fee.year}"
             if key not in fee_data:
@@ -84,11 +85,23 @@ def portal(request):
                     'term': fee.term.term,
                     'year': fee.year,
                     'transactions': [],
-                    'total_amount': 0
+                    'total_amount': 0,
+                    'balance': 0  # Initialize balance
                 }
             fee_data[key]['transactions'].append(fee)
             fee_data[key]['total_amount'] += fee.amount or 0
+        
+        # Now calculate the balance for each term-year based on the TermFee model
+        for key, data in fee_data.items():
+            # Get the fee for this term and year
+            try:
+                term_fee = TermFee.objects.get(term__term=data['term'], year=data['year'], class_level=student.class_level)
+                total_term_fee = term_fee.fee
+            except TermFee.DoesNotExist:
+                total_term_fee = 0
 
+            # Calculate the balance
+            data['balance'] = total_term_fee - data['total_amount']
 
     transactions = PayFee.objects.filter(student=student)
     total_amount = sum(transaction.amount for transaction in transactions)    

@@ -16,7 +16,7 @@
         {% for student in students %}
             <li>
                 <strong>Name:</strong> {{ student.name }} <br>
-                <strong>Grade:</strong> {{ student.class_name }} <br>
+                <strong>Grade:</strong> {{ student.class_level }} <br>
                 <strong>Reg Number:</strong> {{ student.reg_number }} <br>
             </li>
         {% empty %}
@@ -51,6 +51,10 @@
                 <tr>
                     <td colspan="4"><strong>Total</strong></td>
                     <td><strong>{{ data.total_amount }}</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="4"><strong>Balance</strong></td>
+                    <td><strong>{{ data.balance }}</strong></td>
                 </tr>
             </tbody>
         </table>
