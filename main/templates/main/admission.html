@@ -54,33 +54,22 @@
                 <h4>Student Information</h4>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="first_name">First Name</label>
-                        {% render_field form.first_name class+="form-control" %}
+                        <label for="child_name">Child's Name</label>
+                        {% render_field form.child_name class+="form-control" %}
                     </div>
                     <div class="col-md-6">
-                        <label for="last_name">Last Name</label>
-                        {% render_field form.last_name class+="form-control" %}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="date_of_birth">Date of Birth</label>
-                        {% render_field form.date_of_birth class+="form-control" %}
-                    </div>
-                    <div class="col-md-6">
-                        <label for="gender">Gender</label>
-                        {% render_field form.gender class+="form-control" %}
+                        <label for="d_o_b">Date of Birth</label>
+                        {% render_field form.d_o_b class+="form-control" %}
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="applying_class">Class Applying For</label>
-                        {% render_field form.applying_class class+="form-control" %}
+                        <label for="class_enrolled">Class Enrolled</label>
+                        {% render_field form.class_enrolled class+="form-control" %}
                     </div>
                     <div class="col-md-6">
-                        <label for="previous_school">Previous School (if applicable)</label>
+                        <label for="previous_school">Previous School</label>
                         {% render_field form.previous_school class+="form-control" %}
                     </div>
                 </div>
@@ -89,41 +78,78 @@
                 <h4>Parent/Guardian Information</h4>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="parent_first_name">Parent First Name</label>
-                        {% render_field form.parent_first_name class+="form-control" %}
+                        <label for="fathers_name">Father's Name</label>
+                        {% render_field form.fathers_name class+="form-control" %}
                     </div>
                     <div class="col-md-6">
-                        <label for="parent_last_name">Parent Last Name</label>
-                        {% render_field form.parent_last_name class+="form-control" %}
+                        <label for="fathers_contact">Father's Contact</label>
+                        {% render_field form.fathers_contact class+="form-control" %}
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="parent_phone">Phone Number</label>
-                        {% render_field form.parent_phone class+="form-control" %}
+                        <label for="fathers_occupation">Father's Occupation</label>
+                        {% render_field form.fathers_occupation class+="form-control" %}
                     </div>
                     <div class="col-md-6">
-                        <label for="parent_email">Email Address</label>
-                        {% render_field form.parent_email class+="form-control" %}
+                        <label for="fathers_location">Father's Location</label>
+                        {% render_field form.fathers_location class+="form-control" %}
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="home_address">Home Address</label>
-                    {% render_field form.home_address class+="form-control" %}
-                </div>
-
-                <!-- Emergency Contact Section -->
-                <h4>Emergency Contact</h4>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="emergency_contact_name">Emergency Contact Name</label>
-                        {% render_field form.emergency_contact_name class+="form-control" %}
+                        <label for="mothers_name">Mother's Name</label>
+                        {% render_field form.mothers_name class+="form-control" %}
                     </div>
                     <div class="col-md-6">
-                        <label for="emergency_contact_phone">Emergency Contact Phone Number</label>
-                        {% render_field form.emergency_contact_phone class+="form-control" %}
+                        <label for="mothers_contact">Mother's Contact</label>
+                        {% render_field form.mothers_contact class+="form-control" %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="mothers_occupation">Mother's Occupation</label>
+                        {% render_field form.mothers_occupation class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="residential">Residential Address</label>
+                        {% render_field form.residential class+="form-control" %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="religion">Religion</label>
+                        {% render_field form.religion class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="guardian_name">Guardian's Name</label>
+                        {% render_field form.guardian_name class+="form-control" %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="guardian_contact">Guardian's Contact</label>
+                        {% render_field form.guardian_contact class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="health_status">Health Status</label>
+                        {% render_field form.health_status class+="form-control" %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="hospital_recommendation">Hospital Recommendation</label>
+                        {% render_field form.hospital_recommendation class+="form-control" %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="active_clubs">Active Clubs</label>
+                        {% render_field form.active_clubs class+="form-control" %}
                     </div>
                 </div>
 

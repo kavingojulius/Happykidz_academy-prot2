@@ -1,76 +1,115 @@
 {% extends 'main/base.html' %}
-
 {% load static %}
 
-{% block title %} Admin Page {% endblock %}
+{% block title %}Admin Page{% endblock %}
 
 {% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky">
+                <h5 class="text-center mt-3">Admin Actions</h5>
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a class="btn btn-primary w-100" href="{% url 'admin_conversations' %}">
+                                    Go to Chats
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a class="btn btn-success w-100" href="{% url 'download_admissions_pdf' %}">
+                                    Admissions PDF Download
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button id="toggleButton" class="btn btn-info w-100" onclick="toggleTable()">Show Admissions</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </nav>
 
-<div class="container">
-    <h2 class="text-center">Admin Page</h2>
-    
-    <div class="container my-3">
-        
-        <a href="{% url 'admin_conversations' %}" class="btn btn-primary mt-3">Go to Chats</a>
-        
-        <div class="d-flex  align-items-center mt-4">
-            <h3 style="margin-right: 10px;">Admission Requests</h3>
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h2>Admin Page</h2>
+            </div>
 
-            <!-- Toggle Button -->
-            <button id="toggleButton" class="btn btn-primary" onclick="toggleTable()">Show</button>
-        </div>
+            
 
-        <!-- PDF Download Button -->
-        <a href="{% url 'download_admissions_pdf' %}" class="btn btn-success mb-3">Download as PDF</a>
+            <div id="admissionsTable" class="table-responsive" style="display: none;">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Child Name</th>
+                            <th>Date of Birth</th>
+                            <th>Class Enrolled</th>
+                            <th>Previous School</th>
+                            <th>Father's Name</th>
+                            <th>Father's Contact</th>
+                            <th>Mother's Name</th>
+                            <th>Mother's Contact</th>
+                            <th>Guardian Name</th>
+                            <th>Guardian Contact</th>
+                            <th>Health Status</th>
+                            <th>Hospital Recommendation</th>
+                            <th>Active Clubs</th>
+                            <th>Submitted At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for admission in admissions %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ admission.child_name }}</td>
+                            <td>{{ admission.d_o_b }}</td>
+                            <td>{{ admission.class_enrolled }}</td>
+                            <td>{{ admission.previous_school }}</td>
+                            <td>{{ admission.fathers_name }}</td>
+                            <td>{{ admission.fathers_contact }}</td>
+                            <td>{{ admission.mothers_name }}</td>
+                            <td>{{ admission.mothers_contact }}</td>
+                            <td>{{ admission.guardian_name }}</td>
+                            <td>{{ admission.guardian_contact }}</td>
+                            <td>{{ admission.health_status }}</td>
+                            <td>{{ admission.hospital_recommendation }}</td>
+                            <td>{{ admission.active_clubs }}</td>
+                            <td>{{ admission.submitted_at }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
 
-        <!-- Add the responsive table wrapper and hide it by default -->
-        <div id="admissionsTable" class="table-responsive" style="display: none;">
-            <table class="table table-striped table-bordered table-hover">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Student Name</th>
-                        <th>Gender</th>
-                        <th>Date of Birth</th>
-                        <th>Applying Class</th>
-                        <th>Parent Name</th>
-                        <th>Parent Phone</th>
-                        <th>Submitted At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for admission in admissions %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ admission.first_name }} {{ admission.last_name }}</td>
-                        <td>{{ admission.gender }}</td>
-                        <td>{{ admission.date_of_birth }}</td>
-                        <td>{{ admission.applying_class }}</td>
-                        <td>{{ admission.parent_first_name }} {{ admission.parent_last_name }}</td>
-                        <td>{{ admission.parent_phone }}</td>
-                        <td>{{ admission.submitted_at }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+
+
+
+
+        </main>
     </div>
 </div>
 
-<!-- JavaScript to toggle the visibility of the table -->
 <script>
     function toggleTable() {
         var table = document.getElementById("admissionsTable");
         var button = document.getElementById("toggleButton");
 
         if (table.style.display === "none") {
-            table.style.display = "block";  // Show the table
-            button.textContent = "Hide";    // Change button text to 'Hide'
+            table.style.display = "block";
+            button.textContent = "Hide Admissions";
         } else {
-            table.style.display = "none";   // Hide the table
-            button.textContent = "Show";    // Change button text to 'Show'
+            table.style.display = "none";
+            button.textContent = "Show Admissions";
         }
     }
 </script>
-
 {% endblock %}

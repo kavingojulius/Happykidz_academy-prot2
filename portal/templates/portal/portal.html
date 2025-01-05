@@ -1,3 +1,4 @@
+
 {% extends 'main/base.html' %}
 
 {% load static %}
@@ -5,136 +6,150 @@
 {% block title %} Parents Portal {% endblock %}
 
 {% block content %}
-<div class="container my-3">
-    <!-- Welcome message and username -->
-    <h4 class="text-muted text-center">Welcome, {{ request.user.username }}!</h4>
-    <!-- <h4 class="text-muted">Registration number : </h4> -->
+<div class="container-fluid my-5">
+    <div class="row">
+        <!-- Sidebar for Chat and Change Password -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="text-muted">Welcome, {{ request.user.username }}!</h4>
+                    <h5 class="card-title">Actions</h5>
+                    <a href="{% url 'change_password' %}" class="btn btn-outline-primary btn-block">Change Password</a>
+                    <button id="chat-toggle" class="chat-toggle-btn btn btn-outline-success btn-block">
+                        Chat <span id="new-message-badge" class="badge badge-danger" style="display: none;">New</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <!-- Display student details -->
-    <h5>Student Details:</h5>
-    <ul>
-        {% for student in students %}
-            <li>
-                <strong>Name:</strong> {{ student.name }} <br>
-                <strong>Grade:</strong> {{ student.class_level }} <br>
-                <strong>Reg Number:</strong> {{ student.reg_number }} <br>
-            </li>
-        {% empty %}
-            <p>No students details found for your account.</p>
-        {% endfor %}
-    </ul>
+        <!-- Main Content Area -->
+        <div class="col-md-9">
+            <!-- Display student details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Student Details:</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        {% for student in students %}
+                            <li>
+                                <strong>Name:</strong> {{ student.child_name }} <br>
+                                <strong>Grade:</strong> {{ student.class_enrolled }} <br>
+                                <strong>Reg Number:</strong> {{ student.adm_no }} <br>
+                            </li>
+                        {% empty %}
+                            <p>No student details found for your account.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-    <h5>Fee Payment Details:</h5>
+            <!-- Fee Payment Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Fee Payment Details:</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        {% for fee in fee_data %}
+                            <li>
+                                <strong>Amount to be paid:</strong> {{ fee.fee_payment }} <br>
+                                <strong>Transaction Mode:</strong> {{ fee.mode_of_payment }} <br>
+                                <strong>Amount Paid:</strong> {{ fee.amount_paid }} <br>
+                                <strong>Balance:</strong> {{ fee.balance }} <br>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-    {% for key, data in fee_data.items %}
-        <h6>{{ data.term }} - {{ data.year }}</h6>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Term</th>
-                    <th>Year</th>
-                    <th>Date Paid</th>
-                    <th>Transaction Mode</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transaction in data.transactions %}
-                <tr>
-                    <td>{{ transaction.term }}</td>
-                    <td>{{ data.year }}</td>
-                    <td>{{ transaction.date_paid }}</td>
-                    <td>{{ transaction.transaction_mode }}</td>
-                    <td>{{ transaction.amount }}</td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    <td colspan="4"><strong>Total</strong></td>
-                    <td><strong>{{ data.total_amount }}</strong></td>
-                </tr>
-                <tr>
-                    <td colspan="4"><strong>Balance</strong></td>
-                    <td><strong>{{ data.balance }}</strong></td>
-                </tr>
-            </tbody>
-        </table>
-    {% endfor %}
+            <!-- Health Progress Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Health Progress:</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        {% for record in health_information %}
+                            <li>
+                                <strong>Health Status:</strong> {{ record.health_status }} <br>
+                                <strong>Date Recorded:</strong> {{ record.date_recorded }} <br>
+                                <strong>Notes:</strong> {{ record.notes|default:"No notes available." }} <br>
+                            </li>
+                        {% empty %}
+                            <p>No health progress records found for your account.</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
 
-    
-    
-    
-    <!-- Health Progress Section -->
-    <h5>Health Progress:</h5>
-    <ul>
-        {% for record in health_records %}
-            <li>                
-                <strong>Health Status:</strong> {{ record.health_status }} <br>
-                <strong>Date Recorded:</strong> {{ record.date_recorded }} <br>
-                <strong>Notes:</strong> {{ record.notes|default:"No notes available." }} <br>
-            </li>
-        {% empty %}
-            <p>No health progress records found for your account.</p>
-        {% endfor %}
-    </ul>
-
-
-    <h2>Student Results</h2>
-
-    {% for term, sections in results_data.items %}
-        <h3>Term: {{ term }}</h3>
-        {% for section, data in sections.items %}
-            <h4>Term Section: {{ section }}</h4>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Class</th>
-                        <th>Subject</th>
-                        <th>Marks</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result in data.results %}
-                    <tr>
-                        <td>{{ result.student.class_name }}</td>
-                        <td>{{ result.subject }}</td>
-                        <td>{{ result.marks }}</td>
-                    </tr>
+            <!-- Student Results Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2>Student Results</h2>
+                </div>
+                <div class="card-body">
+                    {% for term, sections in results_data.items %}
+                        <h3>Term: {{ term }}</h3>
+                        <div class="row">
+                            {% for section, data in sections.items %}
+                                <div class="col-md-6">
+                                    <h4>Term Section: {{ section }}</h4>
+                                    <table class="table table-bordered rounded">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>Class</th>
+                                                <th>Subject</th>
+                                                <th>Marks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for result in data.results %}
+                                            <tr>
+                                                <td>{{ result.student.class_name }}</td>
+                                                <td>{{ result.subject }}</td>
+                                                <td>{{ result.marks }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                            <tr>
+                                                <td colspan="2"><strong>Total Marks</strong></td>
+                                                <td><strong>{{ data.total_marks }}</strong></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% endfor %}
-                    <tr>
-                        <td colspan="2"><strong>Total Marks</strong></td>
-                        <td><strong>{{ data.total_marks }}</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        {% endfor %}
-    {% endfor %}
-
-
-
-    <a href="{% url 'change_password' %}" class="btn btn-primary">Change Password</a>
-
-    <br>
-        <!-- Chat button to toggle the chat window -->
-    <button id="chat-toggle" class="chat-toggle-btn mt-3 btn btn-primary">
-        Chat <span id="new-message-badge" class="new-message-badge" style="display: none;">New Message</span>
-    </button>
-</div>
-
-<!-- Chat section (initially hidden) -->
-<div id="chat-container" class="chat-container" style="display: none;">
-    <h5>Chat with Admin</h5>
-    
-    <div id="chat-box" class="chat-box">
-        <!-- Messages will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <form method="POST" class="chat-form" id="chat-form">
-        {% csrf_token %}
-        <textarea id="message-input" name="message" placeholder="Enter your message here" class="chat-input"></textarea><br>
-        <button type="submit" class="chat-button">Send</button>
-        <button type="button" id="delete-chat" class="chat-delete-btn">Delete Chats</button> <!-- New Delete Chats button -->
-    </form>
 </div>
+
+<!-- Floating Chat Area -->
+<div id="floating-chat" class="card chat-area" style="display: none;">
+    <div class="card-header">
+        <h5>Chat-Area with Admin</h5>
+        <button id="close-chat" class="close-chat-btn">&times;</button>
+    </div>
+    <div class="card-body">
+        <div id="chat-box" class="chat-box mb-3">
+            <!-- Messages will be dynamically loaded here -->
+        </div>
+
+        <form method="POST" class="chat-form" id="chat-form">
+            {% csrf_token %}
+            <textarea id="message-input" name="message" placeholder="Enter your message here" class="chat-input form-control mb-2"></textarea>
+            <div class="d-flex">
+                <button type="submit" class="btn btn-primary mr-2">Send</button>
+                <button type="button" id="delete-chat" class="btn btn-danger">Delete Chats</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Include your existing scripts and styles for chat and other functionalities here -->
 
 <!-- AJAX for refreshing messages and deleting chat -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -177,73 +192,69 @@
                 let unreadCount = 0;
 
                 messages.forEach(function(message) {
-                    // Count unread messages from admin
                     if (message.fields.sender != "{{ request.user.id }}" && !message.fields.read) {
                         unreadCount++;
                     }
                 });
 
-                // Show/hide the new message badge
                 let badge = document.getElementById('new-message-badge');
                 if (unreadCount > 0) {
-                    badge.style.display = 'inline';  // Show badge
+                    badge.style.display = 'inline';
                 } else {
-                    badge.style.display = 'none';  // Hide badge
+                    badge.style.display = 'none';
                 }
             }
         });
     }
 
-    // Load messages every 5 seconds and check for new messages
     setInterval(loadMessages, 5000);
     setInterval(checkNewMessages, 5000);
-    loadMessages();  // Initial load
-    checkNewMessages();  // Initial check for new messages
+    loadMessages();
+    checkNewMessages();
 
-    // Toggle chat visibility
     document.getElementById('chat-toggle').addEventListener('click', function() {
-        let chatContainer = document.getElementById('chat-container');
-        if (chatContainer.style.display === 'none') {
-            chatContainer.style.display = 'block';
-            loadMessages(); // Load messages when the chat is opened
-        } else {
-            chatContainer.style.display = 'none';
+        let floatingChat = document.getElementById('floating-chat');
+        if (floatingChat.style.display === 'none') {
+            floatingChat.style.display = 'block';
+            loadMessages();
         }
     });
 
-    // Handle message submission
+    document.getElementById('close-chat').addEventListener('click', function() {
+        document.getElementById('floating-chat').style.display = 'none';
+    });
+
     document.getElementById('chat-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the form from submitting the traditional way
+        event.preventDefault();
         let messageInput = document.getElementById('message-input');
         let messageText = messageInput.value;
 
         if (messageText) {
             $.ajax({
-                url: "{% url 'portal' %}", // Ensure this is the correct URL for sending messages
+                url: "{% url 'portal' %}",
                 method: 'POST',
                 data: {
                     'message': messageText,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}' // Include CSRF token
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function() {
-                    messageInput.value = ''; // Clear input after sending
-                    loadMessages(); // Refresh messages
+                    messageInput.value = '';
+                    loadMessages();
                 }
             });
         }
     });
 
-    // Handle chat deletion
     document.getElementById('delete-chat').addEventListener('click', function() {
         if (confirm('Are you sure you want to delete all your chats?')) {
             $.ajax({
-                url: "{% url 'delete_chats' %}",  // Use the appropriate URL for deleting chats
+                url: "{% url 'delete_chats' %}",
                 method: 'POST',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
                 success: function() {
-                    loadMessages();  // Reload messages after deletion (it will be empty)
+                    loadMessages();
                 }
             });
         }
@@ -251,17 +262,18 @@
 </script>
 
 <style>
-    /* Main chat container */
-    .chat-container {
-        max-width: 600px;
-        margin: 20px auto;
-        padding: 20px;
+    .chat-area {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        width: 400px;
+        max-width: 100%;
         border: 1px solid #ccc;
         border-radius: 10px;
         background-color: #f9f9f9;
+        z-index: 1050;
     }
 
-    /* Chat box styling */
     .chat-box {
         height: 300px;
         overflow-y: scroll;
@@ -272,7 +284,6 @@
         margin-bottom: 15px;
     }
 
-    /* Individual message styling */
     .chat-message {
         margin-bottom: 10px;
         padding: 8px 12px;
@@ -281,19 +292,16 @@
         word-wrap: break-word;
     }
 
-    /* User's messages */
     .user-message {
         background-color: #e0ffe0;
         text-align: right;
         margin-left: auto;
     }
 
-    /* Admin's messages */
     .admin-message {
         background-color: #f1f1f1;
     }
 
-    /* Chat input area */
     .chat-input {
         width: 100%;
         height: 50px;
@@ -303,7 +311,6 @@
         resize: none;
     }
 
-    /* Send button styling */
     .chat-button {
         background-color: #007bff;
         color: #fff;
@@ -318,22 +325,20 @@
         background-color: #0056b3;
     }
 
-    /* Delete button styling */
-    .chat-delete-btn {
-        background-color: #dc3545;
-        color: #fff;
-        padding: 10px 20px;
+    .close-chat-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
         border: none;
-        border-radius: 10px;
+        background: none;
+        font-size: 24px;
         cursor: pointer;
-        margin-left: 10px;
     }
 
-    .chat-delete-btn:hover {
-        background-color: #c82333;
+    .close-chat-btn:hover {
+        color: red;
     }
 
-    /* Chat toggle button styling */
     .chat-toggle-btn {
         background-color: #28a745;
         color: #fff;
@@ -348,7 +353,6 @@
         background-color: #218838;
     }
 
-    /* New message badge */
     .new-message-badge {
         background-color: #ff0000;
         color: #fff;
@@ -356,11 +360,6 @@
         border-radius: 50px;
         font-size: 12px;
         margin-left: 10px;
-    }
-
-    /* Add margin-top for spacing between the username and the chat button */
-    .mt-3 {
-        margin-top: 20px;
     }
 </style>
 {% endblock %}

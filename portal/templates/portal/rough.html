@@ -216,3 +216,37 @@
 
 
 
+
+    {% for key, data in fee_data.items %}
+        <h6>{{ data.term }} - {{ data.year }}</h6>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Term</th>
+                    <th>Year</th>
+                    <th>Date Paid</th>
+                    <th>Transaction Mode</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in data.transactions %}
+                <tr>
+                    <td>{{ transaction.term }}</td>
+                    <td>{{ data.year }}</td>
+                    <td>{{ transaction.date_paid }}</td>
+                    <td>{{ transaction.transaction_mode }}</td>
+                    <td>{{ transaction.amount }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="4"><strong>Total</strong></td>
+                    <td><strong>{{ data.total_amount }}</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="4"><strong>Balance</strong></td>
+                    <td><strong>{{ data.balance }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    {% endfor %}

@@ -51,46 +51,6 @@ class Gallery(models.Model):
     class Meta:
         verbose_name_plural = 'Gallery (images)'
 
-class StudentAdmission(models.Model):
-    # Student Information
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    date_of_birth = models.DateField()
-    GENDER_CHOICES = [
-        ('male', 'Male'),
-        ('female', 'Female'),
-        ('other', 'Other'),
-    ]
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
-    CLASS_CHOICES = [
-        ('daycare', 'Daycare'),
-        ('playgroup', 'Playgroup'),
-        ('kindergarten', 'Kindergarten'),
-        ('grade1', 'Grade 1'),
-        ('grade2', 'Grade 2'),
-        ('grade3', 'Grade 3'),
-    ]
-    applying_class = models.CharField(max_length=20, choices=CLASS_CHOICES)
-    previous_school = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Parent/Guardian Information
-    parent_first_name = models.CharField(max_length=50)
-    parent_last_name = models.CharField(max_length=50)
-    parent_phone = models.CharField(max_length=15)
-    parent_email = models.EmailField()
-    home_address = models.TextField()
-
-    # Emergency Contact
-    emergency_contact_name = models.CharField(max_length=100)
-    emergency_contact_phone = models.CharField(max_length=15)
-
-    # Timestamp
-    submitted_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.first_name} {self.last_name} - {self.applying_class}"
-    class Meta:
-        verbose_name_plural = 'Student Admission Requests'
     
 class News(models.Model):
     title = models.CharField(max_length=255)
@@ -103,4 +63,44 @@ class News(models.Model):
     
     class Meta:
         verbose_name_plural = 'News'
+
+
+class Admission(models.Model):
+    # Student Information
+    child_name = models.CharField(max_length=100)
+    d_o_b = models.CharField(max_length=10)  # Date of Birth as string (in 'YYYY-MM-DD' format)
+    class_enrolled = models.CharField(max_length=10)
+    previous_school = models.CharField(max_length=100, blank=True, null=True)
+    
+    # Parent/Guardian Information
+    fathers_name = models.CharField(max_length=100)
+    fathers_contact = models.CharField(max_length=100)
+    fathers_occupation = models.CharField(max_length=100)
+    fathers_location = models.CharField(max_length=100)
+    
+    mothers_name = models.CharField(max_length=100)
+    mothers_contact = models.CharField(max_length=100)
+    mothers_occupation = models.CharField(max_length=100)
+    residential = models.CharField(max_length=100)
+    
+    # Guardian and Health Information
+    religion = models.CharField(max_length=100)
+    guardian_name = models.CharField(max_length=100)
+    guardian_contact = models.CharField(max_length=100)
+    health_status = models.CharField(max_length=100)
+    hospital_recommendation = models.CharField(max_length=100)
+    active_clubs = models.CharField(max_length=100)
+
+    # Timestamp
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.child_name} - {self.class_enrolled}"
+
+    class Meta:
+        verbose_name_plural = 'Admission Requests'
+
+
+
+
 

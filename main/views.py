@@ -61,12 +61,12 @@ def gallery(request):
 
 def admission(request):
     if request.method == 'POST':
-        form = StudentAdmissionForm(request.POST)
+        form = AdmissionForm(request.POST)
         if form.is_valid():
             form.save()  # Save the form data to the database
             return redirect('admission_success')  # Redirect to a success page after submission
     else:
-        form = StudentAdmissionForm()
+        form = AdmissionForm()
     return render(request, 'main/admission.html', {'form':form})
 
 def admission_success(request):    

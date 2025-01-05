@@ -2,24 +2,51 @@
 
 {% load static %}
 
-{% block title %} Admin Chat Page {% endblock %}
+{% block title %}Admin Chat Page{% endblock %}
 
 {% block content %}
-<div class="chat-container">
-    <h2>Chat with {{ user.username }}</h2>
-    
-    <div id="chat-box" class="chat-box">
-        <!-- Messages will be dynamically loaded here -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar">
+            <div class="card mt-3">
+                <div class="card-header text-center">
+                    <h5>Actions</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a href="{% url 'admin_conversations' %}" class="nav-link btn btn-outline-primary w-100 mt-2">
+                                Chats Page
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'admin' %}" class="nav-link btn btn-outline-primary w-100 mt-2">
+                                Admin Page
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="chat-container">
+                <h2>Chat with {{ user.username }}</h2>
+
+                <div id="chat-box" class="chat-box">
+                    <!-- Messages will be dynamically loaded here -->
+                </div>
+
+                <form method="POST" class="chat-form">
+                    {% csrf_token %}
+                    <textarea id="message-input" name="message" placeholder="Enter your message here" class="chat-input"></textarea><br>
+                    <button type="submit" class="chat-button">Reply</button>
+                </form>
+            </div>
+        </main>
     </div>
-    
-    <form method="POST" class="chat-form">
-        {% csrf_token %}
-        <textarea id="message-input" name="message" placeholder="Enter your message here" class="chat-input"></textarea><br>
-        <button type="submit" class="chat-button">Reply</button>
-    </form>
-</div>
-<div class="container text-center">
-    <a href="{% url 'admin_conversations' %}" class="btn btn-outline-primary">Back to conversations</a>
 </div>
 
 <!-- AJAX for refreshing messages without reloading the page -->
@@ -60,7 +87,25 @@
 </script>
 
 <style>
-    /* Main chat container */
+    /* Sidebar styles */
+    .sidebar {
+        height: 100vh;
+        padding-top: 20px;
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: #007bff;
+        color: white;
+        border-bottom: 1px solid #ddd;
+    }
+
     .chat-container {
         max-width: 600px;
         margin: 20px auto;
@@ -70,7 +115,6 @@
         background-color: #f9f9f9;
     }
 
-    /* Chat box styling */
     .chat-box {
         height: 300px;
         overflow-y: scroll;
@@ -81,7 +125,6 @@
         margin-bottom: 15px;
     }
 
-    /* Individual message styling */
     .chat-message {
         margin-bottom: 10px;
         padding: 8px 12px;
@@ -90,19 +133,16 @@
         word-wrap: break-word;
     }
 
-    /* Admin's messages */
     .user-message {
         background-color: #e0ffe0;
         text-align: right;
         margin-left: auto;
     }
 
-    /* User's messages */
     .user-message-other {
         background-color: #f1f1f1;
     }
 
-    /* Chat input area */
     .chat-input {
         width: 100%;
         height: 50px;
@@ -112,7 +152,6 @@
         resize: none;
     }
 
-    /* Reply button styling */
     .chat-button {
         background-color: #007bff;
         color: #fff;
@@ -127,5 +166,17 @@
         background-color: #0056b3;
     }
 
+    /* Consistent button style for both sidebar buttons */
+    .nav-link.btn-outline-primary {
+        border-color: #007bff;
+        color: #007bff;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    .nav-link.btn-outline-primary:hover {
+        background-color: #007bff;
+        color: white;
+    }
 </style>
 {% endblock %}

@@ -8,7 +8,7 @@
 
 <div class="container">
     <h2>User Conversations</h2>
-    <a href="{% url 'admin' %}" class="btn btn-success mb-3">Back to Admin page</a>
+    <a href="{% url 'admin' %}" class="btn btn-success mb-3">Admin page</a>
     
     <div class="conversations">
         {% for user in users %}
@@ -22,7 +22,7 @@
                     </div>
                 </a>
                 <!-- Delete button for each user -->
-                <button class="delete-btn" data-user-id="{{ user.id }}">Delete Conversation</button>
+                <button class="delete-btn" data-user-id="{{ user.id }}">Delete Chat</button>
             </div>
         {% endfor %}
     </div>

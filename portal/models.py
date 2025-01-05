@@ -8,9 +8,8 @@ from django.contrib.auth import get_user_model  # Use this to get the CustomUser
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-# Get the custom user model
+# ------- custom user model ---- Creating extra field(s) for User in the admin panel  ------
 
-# Creating extra field(s) for User in the admin panel
 class CustomUser(AbstractUser):
     reg_number = models.CharField(max_length=20, unique=True, blank=True, null=True)    
 
@@ -32,90 +31,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.reg_number})"
-    
-# The document to be uploaded containing diff students & their details(excel file)
-class DocTitle(models.Model):
-
-    DOCUMENT_TYPE_CHOICES = [
-        ('student_details', 'Student Details'),
-        ('fee_payment', 'Fee Payment')
-    ]
-
-    title = models.CharField(max_length=255)
-    type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES, default='student_details')  # New field to select document type --
-    document = models.FileField(upload_to='docs/')
-
-    def __str__(self):
-        return self.title 
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.document: # Check if there is a document uploaded
-            self.process_document()
-    class Meta:
-        verbose_name_plural = 'Documents'
-
-    def process_document(self):
-        if self.type == 'student_details':
-            self.read_excel_and_create_students()
-        elif self.type == 'fee_payment':
-            self.read_excel_and_create_fee_payments()
-
-    def read_excel_and_create_students(self):
-        User = get_user_model()  # Get the custom user model instead of the default User
-        wb = openpyxl.load_workbook(self.document.path)
-        sheet = wb.active
         
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-            name, reg_number, grade = row  # Adjust according to your Excel structure
-
-            try:
-                parent = User.objects.get(reg_number=reg_number)
-            except User.DoesNotExist:
-                parent = None
-
-            if parent:
-                # Create or update student record
-                # Check if the student already exists
-                StudentDet.objects.update_or_create(
-                    # doc_title=self,
-                    name=name,
-                    defaults={'reg_number': reg_number, 'grade': grade}
-                )   
-        
-            # Create or update student record
-            # Check if the student already exists
-            # StudentDet.objects.update_or_create(
-                
-            #     name=name,
-            #     defaults={'reg_number': reg_number, 'grade': grade}
-            # )
-
-    def read_excel_and_create_fee_payments(self):
-        wb = openpyxl.load_workbook(self.document.path)
-        sheet = wb.active
-
-        for row in sheet.iter_rows(min_row=2, values_only=True):
-            student_name, reg_number, amount, date_paid, balance = row
-            
-            FeePayment.objects.update_or_create(
-                doc_title=self,
-                reg_number=reg_number,
-                defaults={'student_name': student_name, 'amount': amount, 'date_paid': date_paid, 'balance': balance,}
-            )
-
-# The student details (has the same fields as the students excel file)
-class StudentDet(models.Model):
-
-    name = models.CharField(max_length=100)
-    reg_number = models.CharField(max_length=100, null=True, blank=True)    
-    class_level = models.ForeignKey('ClassLevel', on_delete=models.CASCADE, related_name='students', null=True, blank=True)
-
-    class Meta:                 
-        verbose_name_plural = 'Student Details'
-
-    def __str__(self):
-        return self.reg_number
 
 class Message(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
@@ -130,203 +46,16 @@ class Message(models.Model):
     class Meta:
         ordering = ['timestamp']  # Messages will be ordered by time
 
-class Fee(models.Model):
-    student_name = models.CharField(max_length=100, blank=True, null=True)
-    reg_number = models.CharField(max_length=100, blank=True, null=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    date_paid = models.DateField(blank=True, null=True)
-    balance = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    document = models.FileField(upload_to='fee_documents/', blank=True, null=True)  # For uploading Excel files
-
-    def __str__(self):
-        if self.document:
-            return f"Fee payments from document: {self.document.name}"
-        else:
-            return f"Payment for {self.reg_number} on {self.date_paid}"    
-
-    class Meta:
-        verbose_name_plural = 'Fees'
-
-    def save(self, *args, **kwargs):
-        # Check for skip flag to prevent recursion during bulk creation
-        skip_processing = kwargs.pop('skip_processing', False)
-        super().save(*args, **kwargs)
-
-        # Process the document only if it's a new instance and not skipped
-        if self.pk and self.document and not skip_processing:
-            self.process_excel_file()
-
-    def process_excel_file(self):
-        try:
-            # Load the Excel file
-            file_path = self.document.path
-            df = pd.read_excel(file_path)
-
-            # Ensure the file has the expected columns
-            expected_columns = {'student_name', 'reg_number', 'amount', 'date_paid', 'balance'}
-            if not expected_columns.issubset(df.columns):
-                raise ValueError(f"The uploaded file must contain these columns: {expected_columns}")
-
-            # Iterate through rows and create new FeePayment instances
-            for _, row in df.iterrows():
-                fee = Fee(
-                    student_name=row.get('student_name', 'Unknown'),
-                    reg_number=row['reg_number'],
-                    amount=row['amount'],
-                    date_paid=row['date_paid'],
-                    balance=row.get('balance', 0.00),
-                    document=self.document,  # Assign the current document to the new records                    
-                )
-                fee.save(skip_processing=True)  # Pass the flag only to the `save()` method
-
-            # Check if the current record contains only the document field and delete it if true
-            if not self.student_name and not self.reg_number and not self.amount and not self.date_paid and not self.balance:
-                self.delete()  # Deletes the current instance
-
-            # Optionally delete the uploaded document after processing
-            self.document.delete(save=False)
-
-        except Exception as e:
-            raise ValueError(f"Error processing Excel file: {e}")
-
-
-class HealthProgress(models.Model):
-    # Link to a specific student
-    student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="health_records")
-    
-    # Health status
-    health_status = models.CharField(
-        max_length=50, 
-        choices=[
-            ('Excellent', 'Excellent'),
-            ('Good', 'Good'),
-            ('Average', 'Average'),
-            ('Poor', 'Poor')
-        ],
-        default='Good',
-        help_text="Overall health status"
-    )
-    
-    # Additional notes
-    notes = models.TextField(blank=True, help_text="Additional health notes")
-    
-    # Date of the record
-    date_recorded = models.DateField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-date_recorded']
-        verbose_name = "Health Progress"
-        verbose_name_plural = "Health Progress Records"
-
-    def __str__(self):
-        return f"{self.student.name}'s Health Record on {self.date_recorded}"
-
-
-class FeePay(models.Model):
-    student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="fee_records", null=True, blank=True)
-    term = models.CharField(
-        max_length=50, 
-        choices=[
-            ('Term 1', 'Term 1'),
-            ('Term 2', 'Term 2'),
-            ('Term 3', 'Term 3'),            
-        ],
-        default='Term 1',
-    )
-    amounts = models.JSONField(        
-        default=list,  # Default is an empty list
-        help_text="List of payment amounts"
-    )
-    date_paid = models.DateField(blank=True, null=True) 
-
-    class Meta:
-        ordering = ['-date_paid']
-        verbose_name = "Fee Payment"
-        verbose_name_plural = "Fee Payment Records"
-
-    def __str__(self):
-        return f"{self.student.reg_number}'s Fee Payment Record on {self.date_paid}"       
-
-    def total_amount_paid(self):
-        """Calculate the total amount paid."""
-        return sum(self.amounts)
-
-    def add_payment(self, amount):
-        """Add a new payment to the amounts list."""
-        self.amounts.append(amount)
-        self.save()
 
 class ClassLevel(models.Model):
     name = models.CharField(max_length=50, unique=True)  # e.g., "Grade 1", "Grade 2"    
 
     class Meta:
-        pass
+        verbose_name_plural = 'Class , Grade etc'
 
     def __str__(self):
         return f"{self.name}"
 
-class PayFee(models.Model):
-    
-    student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="pay_fee_records")
-    term = models.ForeignKey('Term', on_delete=models.CASCADE, related_name="pay_fee_records")
-    date_paid = models.DateField(blank=True, null=True)
-    transaction_mode = models.CharField(max_length=100, blank=True, null=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)    
-
-    class Meta:
-        pass
-
-    def __str__(self):
-        return f"{self.student.reg_number} - {self.term} ({self.date_paid})"
-
-class TermFee(models.Model):
-    term = models.ForeignKey('Term', on_delete=models.CASCADE, related_name="term_fee_records")
-    class_level = models.ForeignKey('ClassLevel', on_delete=models.CASCADE, related_name="term_fee_records")
-    fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    year = models.DateField(blank=True, null=True)
-
-    class Meta:
-        pass
-
-    def __str__(self):
-        return f"{self.class_level} {self.term} - {self.fee} - {self.year}"
-
-class Results(models.Model):
-    
-    student = models.ForeignKey(StudentDet, on_delete=models.CASCADE, related_name="results_records")
-    term = models.ForeignKey('Term', on_delete=models.CASCADE, related_name="results_records")
-    term_section = models.ForeignKey('TermSection', on_delete=models.CASCADE, related_name="results_records")
-    date_recorded = models.DateField(blank=True, null=True)
-    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, related_name="results_records")
-    marks =  models.PositiveIntegerField()
-
-    class Meta:
-        pass
-
-    def __str__(self):
-        return f"{self.student.reg_number} - {self.term} ({self.date_recorded})"
-    
-    def clean(self):
-        # Validate against duplicate subject, term, term section, and year (ignore marks)
-        existing_results = Results.objects.filter(
-            student=self.student,
-            term=self.term,
-            term_section=self.term_section,
-            subject=self.subject,
-            term__year=self.term.year,  # Check the year
-        )
-        if self.pk:
-            existing_results = existing_results.exclude(pk=self.pk)  # Exclude current instance if editing
-        if existing_results.exists():
-            raise ValidationError(
-                f"A result for {self.student.name} in {self.subject} "
-                f"({self.term} - {self.term_section}, Year: {self.term.year}) already exists."
-            )
-
-    def save(self, *args, **kwargs):
-        # Call the clean method to validate before saving
-        self.clean()
-        super().save(*args, **kwargs)
 
 class Subject(models.Model):
     subject = models.CharField(max_length=50)    
@@ -336,6 +65,7 @@ class Subject(models.Model):
 
     def __str__(self):
         return f"{self.subject}"
+
 
 class Term(models.Model):
     term = models.CharField(max_length=50 )    
@@ -359,14 +89,212 @@ class TermSection(models.Model):
         return f"{self.term_section}"
 
 
+class Document(models.Model):
+
+    title = models.CharField(max_length=255)
+    document = models.FileField(upload_to='excel_docs/')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.document: # Check if there is a document uploaded
+            self.read_excel_and_create_students()
+    class Meta:
+        verbose_name_plural = 'Student details excel upload'
+    
+    def __str__(self):
+        return self.title
+
+    def read_excel_and_create_students(self):
+        wb = openpyxl.load_workbook(self.document.path)
+        sheet = wb.active
+
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+        
+            ADM_NO, CHILD_NAME, D_O_B, CLASS_ENROLLED, PREVIOUS_SCHOOL, NATIONALITY, FATHERS_NAME, FATHERS_CONTACT, FATHERS_OCCUPATION, FATHERS_LOCATION, MOTHERS_NAME, MOTHERS_CONTACT, MOTHERS_OCCUPATION, RESIDENTIAL, RELIGION, GUARDIANS_NAME, GUARDIANS_CONTACT, HEALTH, HOSPITAL_RECCOMMENDATION, ACTIVE_CLUBS = row
+            
+            Students.objects.update_or_create(
+                # doc_title=self,
+                adm_no=ADM_NO,
+                defaults={'child_name': CHILD_NAME,
+                        'd_o_b': D_O_B, 
+                        'class_enrolled': CLASS_ENROLLED,
+                        'previous_school': PREVIOUS_SCHOOL,
+                        'nationality': NATIONALITY,
+                        'fathers_name': FATHERS_NAME,
+                        'fathers_contact': FATHERS_CONTACT,
+                        'fathers_occupation': FATHERS_OCCUPATION,
+                        'fathers_location': FATHERS_LOCATION,
+                        'mothers_name': MOTHERS_NAME,
+                        'mothers_contact': MOTHERS_CONTACT,
+                        'mothers_occupation': MOTHERS_OCCUPATION,
+                        'residential': RESIDENTIAL,
+                        'religion': RELIGION,
+                        'guardian_name': GUARDIANS_NAME,
+                        'guardian_contact': GUARDIANS_CONTACT,
+                        'health_status': HEALTH,
+                        'hospital_recommendation': HOSPITAL_RECCOMMENDATION,
+                        'active_clubs': ACTIVE_CLUBS,
+                    }
+            )
+        
+
+class Students(models.Model):        
+    adm_no = models.CharField(max_length=100, unique=True)
+    child_name = models.CharField(max_length=100, null=True, blank=True)
+    d_o_b = models.CharField(max_length=10, null=True, blank=True)
+    class_enrolled = models.CharField(max_length=10, null=True, blank=True)
+
+    previous_school = models.CharField(max_length=100, null=True, blank=True)
+    nationality = models.CharField(max_length=100, null=True, blank=True)
+    fathers_name = models.CharField(max_length=100, null=True, blank=True)
+    fathers_contact = models.CharField(max_length=100, null=True, blank=True)
+    fathers_occupation = models.CharField(max_length=100, null=True, blank=True)
+    fathers_location = models.CharField(max_length=100, null=True, blank=True)
+    mothers_name = models.CharField(max_length=100, null=True, blank=True)
+    mothers_contact = models.CharField(max_length=100, null=True, blank=True)
+    mothers_occupation = models.CharField(max_length=100, null=True, blank=True)
+    residential = models.CharField(max_length=100, null=True, blank=True)
+    religion = models.CharField(max_length=100, null=True, blank=True)
+    guardian_name = models.CharField(max_length=100, null=True, blank=True)
+    guardian_contact = models.CharField(max_length=100, null=True, blank=True)
+    health_status = models.CharField(max_length=100, null=True, blank=True)
+    hospital_recommendation = models.CharField(max_length=100, null=True, blank=True)
+    active_clubs = models.CharField(max_length=100, null=True, blank=True)
 
 
+    class Meta:
+        verbose_name_plural = 'Student Details' 
 
 
+    def __str__(self):
+        
+        return f"Student {self.adm_no}"
+        
+    
+class Health(models.Model):
+    # Link to a specific student
+    student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name="health_information")
+    
+    # Health status
+    health_status = models.CharField(
+        max_length=50, 
+        choices=[
+            ('Excellent', 'Excellent'),
+            ('Good', 'Good'),
+            ('Average', 'Average'),
+            ('Poor', 'Poor')
+        ],
+        default='Good',
+        help_text="Overall health status"
+    )
+    
+    # Additional notes
+    notes = models.TextField(blank=True, help_text="Additional health notes")
+    
+    # Date of the record
+    date_recorded = models.DateField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date_recorded']        
+        verbose_name_plural = "Health Information"
+
+    def __str__(self):
+        return f"{self.student.child_name}'s Health Record on {self.date_recorded}"
 
 
+class ExcelFeeUpload(models.Model):
+    title = models.CharField(max_length=255)
+    document = models.FileField(upload_to='excel_docs/')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.document: # Check if there is a document uploaded
+            self.read_excel_and_create_payments()
+
+    class Meta:
+        verbose_name_plural = 'Fee excel Upload'
+
+    def __str__(self):
+        return self.title   
+    
+    def read_excel_and_create_payments(self):
+        wb = openpyxl.load_workbook(self.document.path)
+        sheet = wb.active
+
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            
+            ADM_NO, CHILD_NAME, CLASS_ENROLLED, FEE_PAYMENT, AMOUNT_PAID, MODE_OF_PAYMENT, CODE_OR_REF_NO, DATE_PAID, TIME_PAID, BALANCE = row
+
+            FeesPayment.objects.update_or_create(
+                adm_no=ADM_NO,
+                defaults={'child_name': CHILD_NAME,
+                        'class_enrolled': CLASS_ENROLLED,
+                        'fee_payment': FEE_PAYMENT,
+                        'amount_paid': AMOUNT_PAID,
+                        'mode_of_payment': MODE_OF_PAYMENT,
+                        'code_or_ref_no': CODE_OR_REF_NO,
+                        'date_paid': DATE_PAID,
+                        'time_paid': TIME_PAID,
+                        'balance': BALANCE,
+                    }
+            )
 
 
+class FeesPayment(models.Model):
+
+    adm_no = models.CharField(max_length=100, unique=True)
+    child_name = models.CharField(max_length=100, null=True, blank=True)
+    class_enrolled = models.CharField(max_length=100, null=True, blank=True)
+    fee_payment = models.CharField(max_length=100, null=True, blank=True)
+    amount_paid = models.CharField(max_length=100, null=True, blank=True)
+    mode_of_payment = models.CharField(max_length=100, null=True, blank=True)
+    code_or_ref_no = models.CharField(max_length=100, null=True, blank=True)
+    date_paid = models.CharField(max_length=100, null=True, blank=True)
+    time_paid = models.CharField(max_length=100, null=True, blank=True)
+    balance = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = 'Fee Records'
+
+    def __str__(self):
+        return f"Fee Upload {self.adm_no}"
+
+class StudentResults(models.Model):
+    
+    student = models.ForeignKey(Students, on_delete=models.CASCADE, related_name="student_records")
+    term = models.ForeignKey('Term', on_delete=models.CASCADE, related_name="student_records")
+    term_section = models.ForeignKey('TermSection', on_delete=models.CASCADE, related_name="student_records")
+    date_recorded = models.DateField(blank=True, null=True)
+    subject = models.ForeignKey('Subject', on_delete=models.CASCADE, related_name="student_records")
+    marks =  models.PositiveIntegerField()
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.student.adm_no} - {self.term} ({self.date_recorded})"
+    
+    def clean(self):
+        # Validate against duplicate subject, term, term section, and year (ignore marks)
+        existing_results =  StudentResults.objects.filter(
+            student=self.student,
+            term=self.term,
+            term_section=self.term_section,
+            subject=self.subject,
+            term__year=self.term.year,  # Check the year
+        )
+        if self.pk:
+            existing_results = existing_results.exclude(pk=self.pk)  # Exclude current instance if editing
+        if existing_results.exists():
+            raise ValidationError(
+                f"A result for {self.student.child_name} in {self.subject} "
+                f"({self.term} - {self.term_section}, Year: {self.term.year}) already exists."
+            )
+
+    def save(self, *args, **kwargs):
+        # Call the clean method to validate before saving
+        self.clean()
+        super().save(*args, **kwargs)
 
 
 

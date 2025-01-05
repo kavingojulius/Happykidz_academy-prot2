@@ -1,14 +1,15 @@
 from django import forms
 from .models import *
 
-class StudentAdmissionForm(forms.ModelForm):
+
+class AdmissionForm(forms.ModelForm):
     class Meta:
-        model = StudentAdmission
+        model = Admission
         fields = [
-            'first_name', 'last_name', 'date_of_birth', 'gender', 'applying_class', 'previous_school',
-            'parent_first_name', 'parent_last_name', 'parent_phone', 'parent_email', 'home_address',
-            'emergency_contact_name', 'emergency_contact_phone'
+            'child_name', 'd_o_b', 'class_enrolled', 'previous_school',
+            'fathers_name', 'fathers_contact', 'fathers_occupation', 'fathers_location',
+            'mothers_name', 'mothers_contact', 'mothers_occupation', 'residential',
+            'religion', 'guardian_name', 'guardian_contact', 'health_status', 
+            'hospital_recommendation', 'active_clubs'
         ]
-        widgets = {
-            'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
-        }
+        

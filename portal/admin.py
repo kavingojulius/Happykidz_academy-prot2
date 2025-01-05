@@ -4,8 +4,10 @@ from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
 from django.contrib.auth import get_user_model
 from .models import *
-import pandas as pd
-
+from datetime import datetime
+from django.contrib import messages
+from django.http import HttpResponse
+from openpyxl import Workbook
 
 User = get_user_model()  # Get the custom user model
 
@@ -25,96 +27,15 @@ class CustomUserAdmin(UserAdmin):
 # Register the CustomUser model with the custom admin class
 admin.site.register(CustomUser, CustomUserAdmin)
 
-
-class StudentInline(admin.TabularInline):
-    model = StudentDet
-    extra = 1  # Allows adding one more student by default
-
-
-class DocTitleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'type')
-    search_fields = ('title',)    
-
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('name', 'reg_number', 'class_level', ) #'doc_title'
     search_fields = ('name',)
-
-admin.site.register(StudentDet, StudentAdmin)
-admin.site.register(DocTitle, DocTitleAdmin)
-
-@admin.register(Fee)
-class FeeAdmin(admin.ModelAdmin):
-    list_display = ('student_name', 'reg_number', 'amount', 'date_paid', 'balance', 'document')
-    fieldsets = (
-        (None, {
-            'fields': ('student_name', 'reg_number', 'amount', 'date_paid', 'balance', 'document')
-        }),
-    )
-    def save_model(self, request, obj, form, change):
-        is_new = obj.pk is None  # Check if the object is new
-        super().save_model(request, obj, form, change)
-        
-        # After saving the model, process the file if it's new and has a document
-        if is_new and obj.document:
-            obj.process_excel_file()
-
-
-@admin.register(HealthProgress)
-class HealthProgressAdmin(admin.ModelAdmin):
-    list_display = ('student', 'health_status', 'date_recorded')
-    list_filter = ('health_status', 'date_recorded')
-    search_fields = ('student__reg_number',)
-
-@admin.register(FeePay)
-class FeePayAdmin(admin.ModelAdmin):
-    list_display = ('student', 'term', 'total_amount_paid', 'date_paid')
-    list_filter = ('term', 'date_paid')
-    fields = ('student', 'term', 'amounts', 'date_paid')
-    search_fields = ('student','term')
-
-    def total_amount_paid(self, obj):
-        return obj.total_amount_paid()
-
-
-@admin.register(TermFee)
-class TermFeeAdmin(admin.ModelAdmin):
-    list_display = ('class_level', 'term', 'fee', 'year')
-    list_filter = ('class_level', 'term', 'year')
-    search_fields = ('class_level', 'term', 'year')
-
-@admin.register(PayFee)
-class PayFeeAdmin(admin.ModelAdmin):
-    # Define what fields you want to display in the list view
-    list_display = ('student', 'term', 'date_paid', 'transaction_mode', 'amount')
-    
-    # Add filters to easily filter records by 'term' and 'date_paid'
-    list_filter = ('student__reg_number','term', 'date_paid')
-    
-    # Define which fields should be searchable in the admin
-    search_fields = ('student__reg_number', 'term', 'date_paid')
-    
-    # Optional: Allow editing the amount and transaction mode directly in the admin
-    fieldsets = (
-        (None, {
-            'fields': ('student', 'term', 'date_paid', 'transaction_mode', 'amount',)
-        }),
-    )
-        
-    
-    # Customize how the model is saved, if necessary
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
 
 
 @admin.register(ClassLevel)
 class ClassLevelAdmin(admin.ModelAdmin):    
     search_fields = ('name', )    
 
-@admin.register(Results)
-class ResultAdmin(admin.ModelAdmin):
-    list_display = ('student', 'term', 'term_section', 'subject', 'marks')
-    list_filter = ('student__reg_number','term', 'term_section', 'subject')
-    search_fields = ('student__name', 'student__reg_number')
 
 @admin.register(Term)
 class TermAdmin(admin.ModelAdmin):
@@ -133,6 +54,96 @@ class SubjectAdmin(admin.ModelAdmin):
     list_display = ('subject',)
     list_filter = ('subject', )
     search_fields = ('subject',)
+
+admin.site.register(Document)
+
+def export_students_to_excel(modeladmin, request, queryset):
+    # Create a workbook and a sheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Students Data"
+
+    # Define the headers
+    headers = ['ADM_NO', 'CHILD_NAME', 'D_O_B', 'CLASS_ENROLLED', 'PREVIOUS_SCHOOL', 'NATIONALITY',
+               'FATHERS_NAME', 'FATHERS_CONTACT', 'FATHERS_OCCUPATION', 'FATHERS_LOCATION',
+               'MOTHERS_NAME', 'MOTHERS_CONTACT', 'MOTHERS_OCCUPATION', 'RESIDENTIAL', 'RELIGION',
+               'GUARDIAN_NAME', 'GUARDIAN_CONTACT', 'HEALTH_STATUS', 'HOSPITAL_RECOMMENDATION', 'ACTIVE_CLUBS']
+    ws.append(headers)
+
+    # Add data rows
+    for student in queryset:
+        row = [student.adm_no, student.child_name, student.d_o_b, student.class_enrolled, student.previous_school,
+               student.nationality, student.fathers_name, student.fathers_contact, student.fathers_occupation,
+               student.fathers_location, student.mothers_name, student.mothers_contact, student.mothers_occupation,
+               student.residential, student.religion, student.guardian_name, student.guardian_contact,
+               student.health_status, student.hospital_recommendation, student.active_clubs]
+        ws.append(row)
+
+    # Create a response to download the Excel file
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="students_data.xlsx"'
+    wb.save(response)
+    return response
+
+class StdAdmin(admin.ModelAdmin):
+    list_display = ('adm_no', 'child_name', 'd_o_b', 'class_enrolled', 'previous_school', 'nationality', 'fathers_name', 'fathers_contact', 'fathers_occupation', 'fathers_location', 'mothers_name', 'mothers_contact', 'mothers_occupation', 'residential', 'religion', 'guardian_name', 'guardian_contact', 'health_status', 'hospital_recommendation', 'active_clubs')
+    search_fields = ('adm_no', 'child_name', 'd_o_b', 'class_enrolled')
+    actions = [export_students_to_excel]
+
+admin.site.register(Students, StdAdmin)
+
+@admin.register(Health)
+class HealthAdmin(admin.ModelAdmin):
+    list_display = ('student', 'health_status', 'date_recorded')
+    list_filter = ('health_status', 'date_recorded','student')
+    search_fields = ('student__adm_no',)
+
+def export_fees_to_excel(modeladmin, request, queryset):
+    # Create a workbook and a sheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "FeesPayment Data"
+
+    # Define the headers
+    headers = ['ADM_NO', 'CHILD_NAME', 'CLASS_ENROLLED', 'FEE_PAYMENT', 'AMOUNT_PAID', 
+               'MODE_OF_PAYMENT', 'CODE_OR_REF_NO', 'DATE_PAID', 'TIME_PAID', 'BALANCE']
+    ws.append(headers)
+
+    # Add data rows
+    for fee in queryset:
+        row = [fee.adm_no, fee.child_name, fee.class_enrolled, fee.fee_payment, fee.amount_paid,
+               fee.mode_of_payment, fee.code_or_ref_no, fee.date_paid, fee.time_paid, fee.balance]
+        ws.append(row)
+
+    # Create a response to download the Excel file
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="fees_payment.xlsx"'
+    wb.save(response)
+    return response
+
+@admin.register(FeesPayment)
+class FeesPaymentAdmin(admin.ModelAdmin):
+    list_display = ('adm_no', 'child_name', 'class_enrolled', 'fee_payment', 'amount_paid', 'mode_of_payment', 'code_or_ref_no', 'date_paid', 'time_paid', 'balance')
+    search_fields = ('adm_no', 'child_name', 'class_enrolled')
+
+    actions = [export_fees_to_excel]
+
+@admin.register(ExcelFeeUpload)
+class ExcelFeeUploadAdmin(admin.ModelAdmin):
+    list_display = ('title', 'document')
+    search_fields = ('title',)
+
+
+@admin.register(StudentResults)
+class StudentResultsAdmin(admin.ModelAdmin):
+    list_display = ('student', 'term', 'term_section', 'subject', 'marks')
+    list_filter = ('student__adm_no','term', 'term_section', 'subject')
+    search_fields = ('student__child_name', 'student__adm_no')
+
+
+
+
+
 
 
 

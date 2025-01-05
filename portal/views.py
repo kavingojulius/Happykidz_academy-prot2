@@ -11,14 +11,14 @@ from django.http import JsonResponse
 from django.core import serializers
 from django.contrib.auth import get_user_model
 from .models import *
-from main.models import StudentAdmission
+from io import BytesIO
 from django.http import HttpResponse
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-from main.models import StudentAdmission
+from main.models import Admission
 from django.db.models import Sum, F
 from django.db.models.functions import ExtractYear
 from collections import defaultdict
@@ -41,23 +41,30 @@ def portal(request):
     # Mark unread messages as read when the admin opens the chat
     Message.objects.filter(sender=request.user, receiver=request.user, read=False).update(read=True)
 
- # Get the current user's reg_number
-    reg_number = request.user.reg_number
-
+    if request.method == 'POST':
+        message_text = request.POST['message']
+        if message_text:
+            Message.objects.create(sender=request.user, receiver=admin_user, message=message_text)
+            return redirect('portal')  # Reload the page after submitting
+    
+    # Get the current user's adm_no
+    adm_no = request.user.reg_number
+    
     # Filter the students based on the reg_number
-    students = StudentDet.objects.filter(reg_number=reg_number)
+    students = Students.objects.filter(adm_no=adm_no)
 
 
-# Get the student with the matching reg_number (assuming unique reg_number)
+    # Get the student with the matching reg_number (assuming unique reg_number)
     try:
-        student = StudentDet.objects.get(reg_number=reg_number)
-    except StudentDet.DoesNotExist:
-        student = None
+        student = Students.objects.get(adm_no=adm_no)
+    except Students.DoesNotExist:
+        student = None     
+
 
     results_data = []
     if student:
         # Get results grouped by term and term section
-        results = Results.objects.filter(student=student).select_related('term', 'term_section', 'subject')
+        results = StudentResults.objects.filter(student=student).select_related('term', 'term_section', 'subject')
         grouped_results = {}
         for term in results.values_list('term__term', flat=True).distinct():
             term_results = results.filter(term__term=term)
@@ -72,67 +79,29 @@ def portal(request):
 
         results_data = grouped_results
 
-    # Group fees by term and year
-    fee_data = {}
-    if student:
-        # Group fees by term and year
-        fees = PayFee.objects.filter(student=student).annotate(year=F('date_paid'))
-
-        for fee in fees:
-            key = f"{fee.term.term} - {fee.year}"
-            if key not in fee_data:
-                fee_data[key] = {
-                    'term': fee.term.term,
-                    'year': fee.year,
-                    'transactions': [],
-                    'total_amount': 0,
-                    'balance': 0  # Initialize balance
-                }
-            fee_data[key]['transactions'].append(fee)
-            fee_data[key]['total_amount'] += fee.amount or 0
-        
-        # Now calculate the balance for each term-year based on the TermFee model
-        for key, data in fee_data.items():
-            # Get the fee for this term and year
-            try:
-                term_fee = TermFee.objects.get(term__term=data['term'], year=data['year'], class_level=student.class_level)
-                total_term_fee = term_fee.fee
-            except TermFee.DoesNotExist:
-                total_term_fee = 0
-
-            # Calculate the balance
-            data['balance'] = total_term_fee - data['total_amount']
-
-    transactions = PayFee.objects.filter(student=student)
-    total_amount = sum(transaction.amount for transaction in transactions)    
-    health_records = HealthProgress.objects.filter(student__in=students)
-
-    if request.method == 'POST':
-        message_text = request.POST['message']
-        if message_text:
-            Message.objects.create(sender=request.user, receiver=admin_user, message=message_text)
-            return redirect('portal')  # Reload the page after submitting
-
+    
+    health_information = Health.objects.filter(student__in=students)
+    fee_data = FeesPayment.objects.filter(adm_no=adm_no)
+    
     return render(request, 'portal/portal.html', {
         'messages': messages,
         'unread_count': unread_count,  # Pass unread count to the template
-        'students': students,
-        'transactions': transactions,
-        'total_amount': total_amount,
-        'health_records': health_records,
+        'students': students,           
         'results_data': results_data,
         'fee_data': fee_data,  # Pass grouped fee data to the template
+        # 'std': std,
+        'health_information': health_information,        
     })
 
 @login_required
 def admin(request):
     # Retrieve all student admission records
-    admissions = StudentAdmission.objects.all().order_by('-submitted_at')  # Order by submission time, latest first
+    admissions = Admission.objects.all().order_by('-submitted_at')  # Order by submission time, latest first
     return render(request, 'portal/admin.html', {'admissions': admissions})
 
 def download_admissions_pdf(request):
     # Create a byte stream buffer to hold the PDF
-    buffer = io.BytesIO()
+    buffer = BytesIO()
     pdf = SimpleDocTemplate(buffer, pagesize=A4)
     elements = []
 
@@ -143,18 +112,27 @@ def download_admissions_pdf(request):
     elements.extend([header, subheader])
 
     # Define the table data
-    admissions = StudentAdmission.objects.all()
-    data = [["#", "Name", "Gender", "D.O.B", "Class Applied", "Parent Name", "Contact", "Submitted At"]]
-    
+    admissions = Admission.objects.all()
+    data = [["#", "Child Name", "Date of Birth", "Class Enrolled", "Previous School", "Father's Name", 
+             "Father's Contact", "Mother's Name", "Mother's Contact", "Guardian Name", "Guardian Contact", 
+             "Health Status", "Hospital Recommendation", "Active Clubs", "Submitted At"]]
+
     for i, admission in enumerate(admissions, start=1):
         row = [
             i,
-            f"{admission.first_name} {admission.last_name}",
-            admission.gender,
-            admission.date_of_birth.strftime("%Y-%m-%d"),
-            admission.applying_class,
-            f"{admission.parent_first_name} {admission.parent_last_name}",
-            admission.parent_phone,
+            admission.child_name,
+            admission.d_o_b,
+            admission.class_enrolled,
+            admission.previous_school,
+            admission.fathers_name,
+            admission.fathers_contact,
+            admission.mothers_name,
+            admission.mothers_contact,
+            admission.guardian_name,
+            admission.guardian_contact,
+            admission.health_status,
+            admission.hospital_recommendation,
+            admission.active_clubs,
             admission.submitted_at.strftime("%Y-%m-%d %H:%M:%S"),
         ]
         data.append(row)
@@ -171,7 +149,7 @@ def download_admissions_pdf(request):
         ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
     ]))
-    
+
     elements.append(table)
     pdf.build(elements)
 
@@ -180,6 +158,9 @@ def download_admissions_pdf(request):
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="admission_requests.pdf"'
     return response
+
+
+
 
 @login_required
 def delete_chats(request):
